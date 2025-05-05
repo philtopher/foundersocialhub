@@ -14,6 +14,18 @@ import { moderateComment, processCommentResponse } from "./openai";
 import { z } from "zod";
 import { eq, and, desc, asc, sql, isNull, or } from "drizzle-orm";
 import slugify from "slugify";
+import { 
+  createStripeSubscription, 
+  handleStripeWebhook, 
+  createPaypalOrder,
+  capturePaypalOrder,
+  loadPaypalDefault
+} from "./payment-processors";
+import { 
+  sendPaymentConfirmationEmail, 
+  sendPaymentFailedEmail,
+  sendWelcomeEmail 
+} from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes
@@ -514,6 +526,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Search failed" });
     }
   });
+  
+  // Payment routes
+  app.post("/api/payments/stripe/create-subscription", isAuthenticated, createStripeSubscription);
+  app.post("/api/payments/stripe/webhook", handleStripeWebhook);
+  
+  // PayPal routes
+  app.get("/api/payments/paypal/setup", isAuthenticated, loadPaypalDefault);
+  app.post("/api/payments/paypal/order", isAuthenticated, createPaypalOrder);
+  app.post("/api/payments/paypal/order/:orderID/capture", isAuthenticated, capturePaypalOrder);
+  
+  // Payment status route
+  app.get("/api/payments/status", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        paymentStatus: user.paymentStatus || "pending",
+        isPremium: user.isPremium || false,
+        isActive: user.isActive || false,
+        hasStripeSubscription: !!user.stripeSubscriptionId,
+        hasPaypalSubscription: !!user.paypalSubscriptionId
+      });
+    } catch (error) {
+      console.error("Error fetching payment status:", error);
+      res.status(500).json({ message: "Failed to fetch payment status" });
+    }
+  });
+
+  // Test email endpoints - only for development
+  if (process.env.NODE_ENV !== "production") {
+    app.post("/api/test/email/payment-confirmation", isAuthenticated, async (req, res) => {
+      try {
+        const userId = req.user!.id;
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        const result = await sendPaymentConfirmationEmail(user);
+        res.json({ success: result });
+      } catch (error) {
+        console.error("Error sending test email:", error);
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    });
+    
+    app.post("/api/test/email/welcome", isAuthenticated, async (req, res) => {
+      try {
+        const userId = req.user!.id;
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        const result = await sendWelcomeEmail(user);
+        res.json({ success: result });
+      } catch (error) {
+        console.error("Error sending test email:", error);
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    });
+  }
 
   // Create HTTP server
   const httpServer = createServer(app);
