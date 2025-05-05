@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "@/components/profile/profile-settings";
 import { AccountSettings } from "@/components/profile/account-settings";
 import { SubscriptionPanel } from "@/components/subscription/subscription-panel";
+import { ProjectAccessPanel } from "@/components/subscription/project-access-panel";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuth();
@@ -43,6 +44,7 @@ export default function SettingsPage() {
         
         <div className="space-y-6">
           <SubscriptionPanel />
+          <ProjectAccessPanel />
         </div>
       </div>
     </div>

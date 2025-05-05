@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
+import { generateAccessToken, verifyAccessToken, registerWebhook, generateAccessLink } from "./external-access";
 import { 
   insertCommunitySchema, 
   insertPostSchema, 
@@ -1015,6 +1016,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   }
+
+  // External project management platform integration
+  // These routes allow premium users to access the external project management platform
+  
+  // Route to generate access tokens for the external application
+  app.post("/api/external/token", isAuthenticated, generateAccessToken);
+  
+  // Route to verify tokens from the external application
+  app.post("/api/external/verify", verifyAccessToken);
+  
+  // Route to generate single-use access links to the external application
+  app.get("/api/external/access-link", isAuthenticated, generateAccessLink);
+  
+  // Route for the external application to register webhooks
+  app.post("/api/external/webhooks", registerWebhook);
+  
+  // Documentation route for third-party developers
+  app.get("/api/external/docs", (req, res) => {
+    res.json({
+      name: "FounderSocials External API",
+      version: "1.0.0",
+      description: "API for integrating with the FounderSocials platform",
+      documentation: {
+        authentication: {
+          description: "JWT-based authentication for premium users",
+          endpoints: [
+            {
+              path: "/api/external/token",
+              method: "POST",
+              description: "Generate an access token for the external application",
+              requires: "Premium subscription (Standard or Founder plan)"
+            },
+            {
+              path: "/api/external/verify",
+              method: "POST",
+              description: "Verify a token from the external application",
+              authorization: "Bearer token in Authorization header"
+            },
+            {
+              path: "/api/external/access-link",
+              method: "GET",
+              description: "Generate a single-use access link to the external application",
+              requires: "Premium subscription (Standard or Founder plan)"
+            }
+          ]
+        },
+        webhooks: {
+          path: "/api/external/webhooks",
+          method: "POST",
+          description: "Register a webhook to receive notifications about subscription changes",
+          events: ["subscription.upgraded", "subscription.downgraded", "subscription.cancelled"]
+        }
+      }
+    });
+  });
 
   // Create HTTP server
   const httpServer = createServer(app);
