@@ -36,9 +36,9 @@ export default function PaymentPage() {
   return (
     <div className="container py-10 max-w-4xl mx-auto">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Premium Subscription</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Choose Your Subscription</h1>
         <p className="text-muted-foreground mt-2">
-          Upgrade your account to access premium features
+          Select a plan that fits your community engagement needs
         </p>
       </div>
       
@@ -85,7 +85,11 @@ export default function PaymentPage() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-start">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
-                <span>$19.99 per month</span>
+                <span><strong>Standard Plan:</strong> £7/month</span>
+              </li>
+              <li className="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                <span><strong>Founder Plan:</strong> £15/month</span>
               </li>
               <li className="flex items-start">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M21 14H3"></path></svg>

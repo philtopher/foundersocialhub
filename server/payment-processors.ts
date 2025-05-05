@@ -100,11 +100,26 @@ export async function createStripeSubscription(req: Request, res: Response) {
       customerId = customer.id;
     }
     
-    // Use req.body.priceId or default price ID
-    const priceId = req.body.priceId || process.env.STRIPE_PRICE_ID;
+    // Determine which subscription plan to use
+    let priceId;
+    
+    // Check which plan the user is subscribing to
+    const planType = req.body.planType || 'standard';
+    
+    if (planType === 'founder') {
+      priceId = process.env.STRIPE_FOUNDER_PRICE_ID;
+    } else {
+      // Default to standard plan
+      priceId = process.env.STRIPE_STANDARD_PRICE_ID;
+    }
+    
+    // Allow override with explicit price ID if provided
+    if (req.body.priceId) {
+      priceId = req.body.priceId;
+    }
     
     if (!priceId) {
-      return res.status(400).json({ error: "Price ID is required" });
+      return res.status(400).json({ error: "Price ID is required. Please configure STRIPE_STANDARD_PRICE_ID and STRIPE_FOUNDER_PRICE_ID environment variables." });
     }
     
     const subscription = await stripe.subscriptions.create({
@@ -235,10 +250,29 @@ export async function handleStripeWebhook(req: Request, res: Response) {
           const user = await storage.getUserByStripeCustomerId(customer);
           
           if (user) {
+            // Check if this is the Founder tier plan by examining the price ID
+            let isFounderPlan = false;
+            
+            // Check items in the subscription to determine the plan type
+            if (updatedSubscription.items && updatedSubscription.items.data) {
+              const priceId = updatedSubscription.items.data[0]?.price?.id;
+              isFounderPlan = priceId === process.env.STRIPE_FOUNDER_PRICE_ID;
+            }
+            
             // Update user's subscription status based on the subscription status
             if (updatedSubscription.status === 'active') {
               await storage.updateUserPremiumStatus(user.id, true);
               await storage.updateUserActiveStatus(user.id, true);
+              
+              // If this is the Founder plan, update user's plan type in the database
+              if (isFounderPlan) {
+                // Here you would update the user's plan type, e.g.:
+                // await storage.updateUserPlanType(user.id, 'founder');
+                console.log(`User ${user.id} upgraded to Founder plan`);
+              } else {
+                // Standard plan
+                console.log(`User ${user.id} on Standard plan`);
+              }
             } else if (updatedSubscription.status === 'canceled' || 
                        updatedSubscription.status === 'unpaid' || 
                        updatedSubscription.status === 'incomplete_expired') {
