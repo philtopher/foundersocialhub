@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%; /* light background color */
+    --foreground: 215 14% 10%; /* dark text color */
+
+    --primary: 16 100% 50%; /* #FF4500 - Reddit's orangered */
+    --primary-hover: 16 100% 44%; /* #E03D00 - Darker orange for hover states */
+    --primary-light: 16 100% 70%; /* #FF8C69 - Lighter orange */
+    --primary-foreground: 0 0% 100%; /* White text on primary background */
+
+    --secondary: 210 100% 41%; /* #0079D3 - Reddit's blue */
+    --secondary-hover: 210 100% 33%; /* #0061AA - Darker blue for hover states */
+    --secondary-light: 210 73% 76%; /* #99C4E9 - Lighter blue */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary background */
+
+    --accent: 120 71% 31%; /* #1A8917 - Medium green */
+    --accent-hover: 120 67% 25%; /* #146814 - Darker green for hover states */
+    --accent-light: 120 30% 76%; /* #ACD7AB - Lighter green */
+    --accent-foreground: 0 0% 100%; /* White text on accent background */
+
+    --muted: 220 2% 54%; /* #878A8C - Medium gray for neutral text */
+    --muted-foreground: 215 14% 10%; /* Dark text for muted backgrounds */
+
+    --card: 0 0% 100%; /* White card backgrounds */
+    --card-foreground: 215 14% 10%; /* Dark text for cards */
+
+    --popover: 0 0% 100%; /* White popover backgrounds */
+    --popover-foreground: 215 14% 10%; /* Dark text for popovers */
+
+    --border: 220 13% 91%; /* #EDEFF1 - Light gray border color */
+    --input: 220 13% 91%; /* Same as border color for input borders */
+
+    --destructive: 0 84% 60%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+
+    --ring: 210 100% 41%; /* Same as secondary for focus rings */
+
+    /* Chart colors */
+    --chart-1: 210 100% 41%;
+    --chart-2: 16 100% 50%;
+    --chart-3: 120 71% 31%;
+    --chart-4: 43 96% 58%;
+    --chart-5: 271 91% 65%;
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 14% 10%;
+    --sidebar-primary: 16 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 71% 31%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 210 100% 41%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 215 14% 10%; /* #1A1A1B - Dark background */
+    --foreground: 210 20% 98%; /* Light text on dark background */
+
+    --primary: 16 100% 50%; /* #FF4500 - Reddit's orangered */
+    --primary-hover: 16 100% 44%; /* #E03D00 - Darker orange for hover states */
+    --primary-light: 16 80% 40%; /* Darker orange for dark mode */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+
+    --secondary: 210 100% 41%; /* #0079D3 - Reddit's blue */
+    --secondary-hover: 210 100% 33%; /* #0061AA - Darker blue for hover states */
+    --secondary-light: 210 60% 30%; /* Darker blue for dark mode */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary */
+
+    --accent: 120 71% 31%; /* #1A8917 - Medium green */
+    --accent-hover: 120 67% 25%; /* #146814 - Darker green for hover states */
+    --accent-light: 120 40% 25%; /* Darker green for dark mode */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
+
+    --muted: 220 5% 64%; /* Lighter gray for dark mode */
+    --muted-foreground: 210 20% 98%; /* Light text for muted elements */
+
+    --card: 215 13% 15%; /* #2D2D2E - Slightly lighter than background */
+    --card-foreground: 210 20% 98%; /* Light text for cards */
+
+    --popover: 215 13% 15%; /* #2D2D2E - Same as card */
+    --popover-foreground: 210 20% 98%; /* Light text for popovers */
+
+    --border: 215 14% 20%; /* #343536 - Dark border color */
+    --input: 215 14% 20%; /* Same as border for dark mode */
+
+    --destructive: 0 84% 60%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+
+    --ring: 210 100% 41%; /* Same as secondary */
+
+    /* Chart colors for dark mode */
+    --chart-1: 210 100% 50%;
+    --chart-2: 16 100% 60%;
+    --chart-3: 120 71% 40%;
+    --chart-4: 43 96% 65%;
+    --chart-5: 271 91% 75%;
+
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 215 13% 15%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 16 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 71% 31%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 14% 20%;
+    --sidebar-ring: 210 100% 41%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-light text-dark;
+  }
+
+  .community-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .post-body {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
