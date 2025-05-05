@@ -315,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/posts/:postId/comments", isAuthenticated, async (req, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const userId = req.user!.id;
+      const userId = Number(req.user!.id);
       const parentId = req.body.parentId ? parseInt(req.body.parentId) : null;
       
       // Check if post exists
@@ -359,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments/:commentId/respond-to-ai", isAuthenticated, async (req, res) => {
     try {
       const commentId = parseInt(req.params.commentId);
-      const userId = req.user!.id;
+      const userId = Number(req.user!.id);
       const response = req.body.response;
       
       // Check if comment exists and belongs to the user
@@ -397,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments/:commentId/vote", isAuthenticated, async (req, res) => {
     try {
       const commentId = parseInt(req.params.commentId);
-      const userId = req.user!.id;
+      const userId = Number(req.user!.id);
       const voteType = req.body.voteType as "upvote" | "downvote";
       
       if (voteType !== "upvote" && voteType !== "downvote") {
@@ -539,7 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment status route
   app.get("/api/payments/status", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = Number(req.user!.id);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -563,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.NODE_ENV !== "production") {
     app.post("/api/test/email/payment-confirmation", isAuthenticated, async (req, res) => {
       try {
-        const userId = req.user!.id;
+        const userId = Number(req.user!.id);
         const user = await storage.getUser(userId);
         
         if (!user) {
@@ -580,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     app.post("/api/test/email/welcome", isAuthenticated, async (req, res) => {
       try {
-        const userId = req.user!.id;
+        const userId = Number(req.user!.id);
         const user = await storage.getUser(userId);
         
         if (!user) {
