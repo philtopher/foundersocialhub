@@ -1,6 +1,9 @@
 import Stripe from "stripe";
 import { storage } from "./storage";
 import type { Request, Response } from "express";
+import { db } from "../db";
+import { users } from "../shared/schema";
+import { eq } from "drizzle-orm";
 import {
   Client,
   Environment,
@@ -129,11 +132,15 @@ export async function createStripeSubscription(req: Request, res: Response) {
       expand: ['latest_invoice.payment_intent'],
     });
     
+    // Update user with subscription information and plan type
     await storage.updateUserStripeInfo(userId, { 
       customerId, 
       subscriptionId: subscription.id 
     });
     
+    // Update the subscription plan in the database
+    await storage.updateUserSubscriptionPlan(userId, planType as 'standard' | 'founder');
+        
     const invoice = subscription.latest_invoice as Stripe.Invoice;
     const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
     
@@ -264,13 +271,16 @@ export async function handleStripeWebhook(req: Request, res: Response) {
               await storage.updateUserPremiumStatus(user.id, true);
               await storage.updateUserActiveStatus(user.id, true);
               
-              // If this is the Founder plan, update user's plan type in the database
+              // Update the user's subscription plan type in the database
               if (isFounderPlan) {
-                // Here you would update the user's plan type, e.g.:
-                // await storage.updateUserPlanType(user.id, 'founder');
+                await db.update(users)
+                  .set({ subscriptionPlan: 'founder' })
+                  .where(eq(users.id, user.id));
                 console.log(`User ${user.id} upgraded to Founder plan`);
               } else {
-                // Standard plan
+                await db.update(users)
+                  .set({ subscriptionPlan: 'standard' })
+                  .where(eq(users.id, user.id));
                 console.log(`User ${user.id} on Standard plan`);
               }
             } else if (updatedSubscription.status === 'canceled' || 

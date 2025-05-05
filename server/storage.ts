@@ -36,6 +36,7 @@ export interface IStorage {
   updateUserPaymentStatus(userId: string, status: string): Promise<User>;
   updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
   updateUserActiveStatus(userId: string, isActive: boolean): Promise<User>;
+  updateUserSubscriptionPlan(userId: string, planType: 'standard' | 'founder'): Promise<User>;
   updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
   updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User>;
   
@@ -208,6 +209,18 @@ export class DatabaseStorage implements IStorage {
         isPremium: true,
         isActive: true,
         paymentStatus: "completed",
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+  
+  async updateUserSubscriptionPlan(userId: string, planType: 'standard' | 'founder'): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        subscriptionPlan: planType,
         updatedAt: new Date()
       })
       .where(eq(users.id, userId))
