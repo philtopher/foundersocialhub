@@ -50,6 +50,7 @@ export interface IStorage {
   updateUserSubscriptionPlan(userId: number, planType: 'standard' | 'founder'): Promise<User>;
   updateUserStripeInfo(userId: number, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
   updateUserPaypalInfo(userId: number, subscriptionId: string): Promise<User>;
+  updateUserRemainingPrompts(userId: number, promptCount: number): Promise<User>;
   createPasswordResetToken(email: string): Promise<string | null>;
   resetPassword(token: string, newPassword: string): Promise<boolean>;
   
@@ -292,6 +293,18 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ 
         subscriptionPlan: planType,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+  
+  async updateUserRemainingPrompts(userId: number, promptCount: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        remainingPrompts: promptCount,
         updatedAt: new Date()
       })
       .where(eq(users.id, userId))

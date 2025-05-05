@@ -394,6 +394,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to process response" });
     }
   });
+  
+  // AI-enhance a comment
+  app.post("/api/comments/ai-enhance", isAuthenticated, async (req, res) => {
+    try {
+      const { content, postId } = req.body;
+      const user = req.user!;
+      
+      // Check if user has permission to use AI features
+      if (!user.subscriptionPlan || user.subscriptionPlan === "free") {
+        return res.status(403).json({ message: "AI features are only available for premium users" });
+      }
+      
+      // For standard plan users, check remaining prompts
+      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
+        return res.status(403).json({ message: "You have used all your AI prompts for this month" });
+      }
+      
+      // Get post title for context
+      const post = await storage.getPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Process the comment with AI
+      const { enhancedContent, isApproved } = await enhanceComment(content, post.title);
+      
+      if (!isApproved) {
+        return res.status(400).json({ message: "Comment contains inappropriate content" });
+      }
+      
+      // Decrement remaining prompts for standard users
+      if (user.subscriptionPlan === "standard" && typeof user.remainingPrompts === "number") {
+        await storage.updateUserRemainingPrompts(Number(user.id), user.remainingPrompts - 1);
+      }
+      
+      res.status(200).json({ enhancedContent });
+    } catch (error) {
+      console.error("Error enhancing comment with AI:", error);
+      res.status(500).json({ message: "Failed to enhance comment with AI" });
+    }
+  });
+  
+  // Generate process flows from a comment
+  app.post("/api/comments/:commentId/process-flows", isAuthenticated, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.commentId);
+      const user = req.user!;
+      
+      // Check if user has permission to use AI features
+      if (!user.subscriptionPlan || user.subscriptionPlan === "free") {
+        return res.status(403).json({ message: "AI features are only available for premium users" });
+      }
+      
+      // For standard plan users, check remaining prompts
+      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
+        return res.status(403).json({ message: "You have used all your AI prompts for this month" });
+      }
+      
+      // Get the comment
+      const comment = await storage.getComment(commentId);
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      
+      // Get post title for context
+      const post = await storage.getPost(comment.postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Generate process flows
+      const { processFlows, isApproved } = await generateProcessFlows(comment.content, post.title);
+      
+      if (!isApproved) {
+        return res.status(400).json({ message: "Comment is not suitable for process flow generation" });
+      }
+      
+      // Decrement remaining prompts for standard users
+      if (user.subscriptionPlan === "standard" && typeof user.remainingPrompts === "number") {
+        await storage.updateUserRemainingPrompts(Number(user.id), user.remainingPrompts - 1);
+      }
+      
+      // Update comment with AI processed status
+      await storage.updateComment(commentId, {
+        status: "ai_processed"
+      });
+      
+      res.status(200).json({ processFlows });
+    } catch (error) {
+      console.error("Error generating process flows:", error);
+      res.status(500).json({ message: "Failed to generate process flows" });
+    }
+  });
 
   app.post("/api/comments/:commentId/vote", isAuthenticated, async (req, res) => {
     try {
