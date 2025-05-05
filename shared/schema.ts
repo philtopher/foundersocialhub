@@ -18,10 +18,9 @@ export const users = pgTable("users", {
   id: text("id").primaryKey().notNull(), // Using string ID from Replit Auth
   username: text("username").notNull().unique(),
   email: text("email").unique(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
+  displayName: text("display_name"),
   bio: text("bio"),
-  profileImageUrl: text("profile_image_url"),
+  avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   isPremium: boolean("is_premium").default(false),

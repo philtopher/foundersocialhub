@@ -65,10 +65,9 @@ async function upsertUser(claims: any) {
     id: claims["sub"],
     username: claims["username"],
     email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
+    displayName: claims["first_name"] ? `${claims["first_name"]} ${claims["last_name"] || ""}`.trim() : claims["username"],
     bio: claims["bio"],
-    profileImageUrl: claims["profile_image_url"],
+    avatarUrl: claims["profile_image_url"],
   });
 }
 
