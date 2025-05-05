@@ -244,13 +244,23 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getPost(id: number): Promise<Post | undefined> {
-    return await db.query.posts.findFirst({
+    const post = await db.query.posts.findFirst({
       where: eq(posts.id, id),
       with: {
-        author: true,
         community: true
       }
     });
+    
+    if (!post) return undefined;
+    
+    const author = await db.query.users.findFirst({
+      where: eq(users.id, post.authorId)
+    });
+    
+    return {
+      ...post,
+      author
+    };
   }
   
   async getAllPosts(sort: string, page: number, limit: number): Promise<Post[]> {
@@ -271,18 +281,36 @@ export class DatabaseStorage implements IStorage {
         break;
     }
     
-    return await db.query.posts.findMany({
+    // First get the posts with their IDs
+    const postsData = await db.query.posts.findMany({
       orderBy,
       limit,
-      offset,
-      with: {
-        author: true,
-        community: true
-      }
+      offset
     });
+    
+    // Then get the authors and communities separately
+    const postsWithRelations = await Promise.all(
+      postsData.map(async (post) => {
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, post.authorId)
+        });
+        
+        const community = await db.query.communities.findFirst({
+          where: eq(communities.id, post.communityId)
+        });
+        
+        return {
+          ...post,
+          author,
+          community
+        };
+      })
+    );
+    
+    return postsWithRelations;
   }
   
-  async getSubscribedPosts(userId: number, sort: string, page: number, limit: number): Promise<Post[]> {
+  async getSubscribedPosts(userId: string, sort: string, page: number, limit: number): Promise<Post[]> {
     const offset = (page - 1) * limit;
     
     // Get communities the user is part of
@@ -314,16 +342,32 @@ export class DatabaseStorage implements IStorage {
         break;
     }
     
-    return await db.query.posts.findMany({
+    // First get the posts with their IDs
+    const postsData = await db.query.posts.findMany({
       where: inArray(posts.communityId, communityIds),
       orderBy,
       limit,
       offset,
       with: {
-        author: true,
         community: true
       }
     });
+    
+    // Then get the authors separately
+    const postsWithRelations = await Promise.all(
+      postsData.map(async (post) => {
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, post.authorId)
+        });
+        
+        return {
+          ...post,
+          author
+        };
+      })
+    );
+    
+    return postsWithRelations;
   }
   
   async getCommunityPosts(communityId: number, sort: string, page: number, limit: number): Promise<Post[]> {
@@ -344,22 +388,38 @@ export class DatabaseStorage implements IStorage {
         break;
     }
     
-    return await db.query.posts.findMany({
+    // First get the posts with their IDs
+    const postsData = await db.query.posts.findMany({
       where: eq(posts.communityId, communityId),
       orderBy,
       limit,
       offset,
       with: {
-        author: true,
         community: true
       }
     });
+    
+    // Then get the authors separately
+    const postsWithRelations = await Promise.all(
+      postsData.map(async (post) => {
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, post.authorId)
+        });
+        
+        return {
+          ...post,
+          author
+        };
+      })
+    );
+    
+    return postsWithRelations;
   }
   
-  async getUserPosts(userId: number, page: number, limit: number): Promise<Post[]> {
+  async getUserPosts(userId: string, page: number, limit: number): Promise<Post[]> {
     const offset = (page - 1) * limit;
     
-    return await db.query.posts.findMany({
+    const postsData = await db.query.posts.findMany({
       where: eq(posts.authorId, userId),
       orderBy: desc(posts.createdAt),
       limit,
@@ -368,6 +428,22 @@ export class DatabaseStorage implements IStorage {
         community: true
       }
     });
+    
+    // Then get the authors separately
+    const postsWithRelations = await Promise.all(
+      postsData.map(async (post) => {
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, post.authorId)
+        });
+        
+        return {
+          ...post,
+          author
+        };
+      })
+    );
+    
+    return postsWithRelations;
   }
   
   async updatePostVoteCounts(postId: number): Promise<void> {
@@ -412,17 +488,33 @@ export class DatabaseStorage implements IStorage {
   }
   
   async searchPosts(query: string): Promise<Post[]> {
-    return await db.query.posts.findMany({
+    // First get the posts with their IDs
+    const postsData = await db.query.posts.findMany({
       where: or(
         sql`${posts.title} ILIKE ${'%' + query + '%'}`,
         sql`${posts.content} ILIKE ${'%' + query + '%'}`
       ),
       limit: 20,
       with: {
-        author: true,
         community: true
       }
     });
+    
+    // Then get the authors separately
+    const postsWithRelations = await Promise.all(
+      postsData.map(async (post) => {
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, post.authorId)
+        });
+        
+        return {
+          ...post,
+          author
+        };
+      })
+    );
+    
+    return postsWithRelations;
   }
   
   // Post votes methods
@@ -470,12 +562,20 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getComment(id: number): Promise<Comment | undefined> {
-    return await db.query.comments.findFirst({
-      where: eq(comments.id, id),
-      with: {
-        author: true
-      }
+    const comment = await db.query.comments.findFirst({
+      where: eq(comments.id, id)
     });
+    
+    if (!comment) return undefined;
+    
+    const author = await db.query.users.findFirst({
+      where: eq(users.id, comment.authorId)
+    });
+    
+    return {
+      ...comment,
+      author
+    };
   }
   
   async getPostComments(postId: number, sort: string): Promise<Comment[]> {
@@ -494,22 +594,48 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Get top-level comments (no parent)
-    const topLevelComments = await db.query.comments.findMany({
+    const topLevelCommentsQuery = await db.query.comments.findMany({
       where: and(
         eq(comments.postId, postId),
         isNull(comments.parentId)
       ),
       orderBy,
       with: {
-        author: true,
         replies: {
-          with: {
-            author: true
-          },
           orderBy: desc(comments.upvotes)
         }
       }
     });
+    
+    // Process top level comments and their replies
+    const topLevelComments = await Promise.all(
+      topLevelCommentsQuery.map(async (comment) => {
+        // Get the author of the comment
+        const author = await db.query.users.findFirst({
+          where: eq(users.id, comment.authorId)
+        });
+        
+        // Process each reply to add its author
+        const replies = await Promise.all(
+          (comment.replies || []).map(async (reply) => {
+            const replyAuthor = await db.query.users.findFirst({
+              where: eq(users.id, reply.authorId)
+            });
+            
+            return {
+              ...reply,
+              author: replyAuthor
+            };
+          })
+        );
+        
+        return {
+          ...comment,
+          author,
+          replies
+        };
+      })
+    );
     
     return topLevelComments;
   }
@@ -613,13 +739,13 @@ export class DatabaseStorage implements IStorage {
     const userResults = await db.query.users.findMany({
       where: or(
         sql`${users.username} ILIKE ${'%' + query + '%'}`,
-        sql`${users.displayName} ILIKE ${'%' + query + '%'}`
+        sql`${users.firstName} ILIKE ${'%' + query + '%'}`,
+        sql`${users.lastName} ILIKE ${'%' + query + '%'}`
       ),
       limit: 20
     });
     
-    // Remove passwords from results
-    return userResults.map(({ password, ...rest }) => rest);
+    return userResults;
   }
 }
 
