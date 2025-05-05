@@ -531,10 +531,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/stripe/create-subscription", isAuthenticated, createStripeSubscription);
   app.post("/api/payments/stripe/webhook", handleStripeWebhook);
   
-  // PayPal routes
-  app.get("/api/payments/paypal/setup", isAuthenticated, loadPaypalDefault);
-  app.post("/api/payments/paypal/order", isAuthenticated, createPaypalOrder);
-  app.post("/api/payments/paypal/order/:orderID/capture", isAuthenticated, capturePaypalOrder);
+  // PayPal routes - temporarily disabled
+  // app.get("/api/payments/paypal/setup", isAuthenticated, loadPaypalDefault);
+  // app.post("/api/payments/paypal/order", isAuthenticated, createPaypalOrder);
+  // app.post("/api/payments/paypal/order/:orderID/capture", isAuthenticated, capturePaypalOrder);
   
   // Payment status route
   app.get("/api/payments/status", isAuthenticated, async (req, res) => {
