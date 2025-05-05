@@ -288,7 +288,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserSubscriptionPlan(userId: number, planType: 'standard' | 'founder'): Promise<User> {
+  async updateUserSubscriptionPlan(userId: number, planType: 'free' | 'standard' | 'founder'): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 

@@ -1,14 +1,20 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { 
   insertCommunitySchema, 
   insertPostSchema, 
   insertCommentSchema,
   Community,
   commentStatusEnum,
-  voteTypeEnum
+  voteTypeEnum,
+  users,
+  communityMembers,
+  posts,
+  comments,
+  postVotes,
+  commentVotes
 } from "@shared/schema";
 import { moderateComment, processCommentResponse, enhanceComment, generateProcessFlows } from "./openai";
 import { z } from "zod";
@@ -27,6 +33,8 @@ import {
   sendWelcomeEmail,
   sendPasswordResetEmail
 } from "./email";
+import Stripe from "stripe";
+import { db } from "@db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes

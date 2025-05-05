@@ -16,6 +16,7 @@ export const sessions = pgTable(
 // Users
 // Subscription plan types
 export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "free",
   "standard",
   "founder",
 ]);
@@ -34,7 +35,7 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   paypalSubscriptionId: text("paypal_subscription_id"),
-  subscriptionPlan: subscriptionPlanEnum("subscription_plan").default("standard"),
+  subscriptionPlan: subscriptionPlanEnum("subscription_plan").default("free"),
   isActive: boolean("is_active").default(false),
   directCommentsEnabled: boolean("direct_comments_enabled").default(false), // Skip AI workflow if true
   remainingPrompts: integer("remaining_prompts").default(3), // For non-founder users
