@@ -88,3 +88,89 @@ export async function processCommentResponse(originalComment: string, aiPrompt: 
     };
   }
 }
+
+// Enhance a comment with AI to make it more valuable/informative
+export async function enhanceComment(content: string, postTitle: string): Promise<{
+  enhancedContent: string;
+  isApproved: boolean;
+}> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are an AI assistant that helps enhance comments on a professional social network for founders. " +
+            "Your goal is to improve the content by making it more informative, adding relevant details, and ensuring it's constructive. " +
+            "Focus on helping founders communicate more effectively. " +
+            "Respond with JSON in this format: { 'enhancedContent': string, 'isApproved': boolean }. " +
+            "The enhancedContent should preserve the original intent but make it more valuable to readers. " +
+            "Set isApproved to false only if the original comment is inappropriate (contains hate speech, spam, etc.)."
+        },
+        {
+          role: "user",
+          content: `Post Title: ${postTitle}\nOriginal Comment: ${content}`
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+    
+    return {
+      enhancedContent: result.enhancedContent,
+      isApproved: result.isApproved
+    };
+  } catch (error) {
+    console.error("OpenAI comment enhancement error:", error);
+    // Fallback - return the original comment
+    return {
+      enhancedContent: content,
+      isApproved: true
+    };
+  }
+}
+
+// Generate process flows based on a comment
+export async function generateProcessFlows(content: string, postTitle: string): Promise<{
+  processFlows: any[];
+  isApproved: boolean;
+}> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are an AI assistant that helps generate project process flows based on comments in a founder social network. " +
+            "Your goal is to identify potential processes, workflows or project plans from the user's comment. " +
+            "Generate 1-3 process flows depending on the complexity of the content. " +
+            "Respond with JSON in this format: { 'processFlows': [{'title': string, 'description': string, 'steps': [{'name': string, 'description': string}]}], 'isApproved': boolean }. " +
+            "Each process flow should have a clear title, brief description and 3-7 actionable steps. " +
+            "Set isApproved to false only if the comment is inappropriate or doesn't contain enough information to generate meaningful process flows."
+        },
+        {
+          role: "user",
+          content: `Post Title: ${postTitle}\nComment: ${content}`
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+    
+    return {
+      processFlows: result.processFlows || [],
+      isApproved: result.isApproved
+    };
+  } catch (error) {
+    console.error("OpenAI process flow generation error:", error);
+    // Fallback - return empty process flows
+    return {
+      processFlows: [],
+      isApproved: true
+    };
+  }
+}
