@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { Footer } from "@/components/layout/footer";
 import { CreatePostBox } from "@/components/post/create-post-box";
 import { FeedSorting } from "@/components/post/feed-sorting";
 import { PostCard } from "@/components/post/post-card";
@@ -126,6 +127,7 @@ export default function HomePage() {
           <RightSidebar />
         </div>
       </main>
+      <Footer />
       <MobileNavigation />
     </>
   );

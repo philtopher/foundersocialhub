@@ -125,6 +125,7 @@ export const commentStatusEnum = pgEnum("comment_status", [
   "pending",
   "approved",
   "rejected",
+  "ai_processed",
 ]);
 
 export const comments = pgTable("comments", {
@@ -137,6 +138,7 @@ export const comments = pgTable("comments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   upvotes: integer("upvotes").default(0).notNull(),
   downvotes: integer("downvotes").default(0).notNull(),
+  replyCount: integer("reply_count").default(0).notNull(),
   status: commentStatusEnum("status").default("pending").notNull(),
   aiPrompt: text("ai_prompt"),
   aiResponse: text("ai_response"),

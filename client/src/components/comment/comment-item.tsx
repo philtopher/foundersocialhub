@@ -1,154 +1,267 @@
-import { Link } from "wouter";
 import { useState } from "react";
-import { ArrowUp, ArrowDown, Reply, MoreHorizontal } from "lucide-react";
+import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
-import { Comment, User } from "@shared/schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { CreateComment } from "./create-comment";
+import { ThumbsUp, ThumbsDown, Reply, MoreHorizontal, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Comment, User } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface CommentItemProps {
-  comment: Comment & {
-    author?: User;
-    replies?: Array<Comment & { author?: User }>;
-  };
-  postId: number;
-  userVote?: "upvote" | "downvote" | null;
+  comment: Comment & { author?: User };
+  onReplyClick: () => void;
+  isReplying: boolean;
+  currentUser: User | null;
 }
 
-export function CommentItem({ comment, postId, userVote }: CommentItemProps) {
-  const { user } = useAuth();
+export function CommentItem({ comment, onReplyClick, isReplying, currentUser }: CommentItemProps) {
+  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const { toast } = useToast();
-  const [currentVote, setCurrentVote] = useState<"upvote" | "downvote" | null>(userVote || null);
-  const [voteCount, setVoteCount] = useState(comment.upvotes - comment.downvotes);
-  const [isReplying, setIsReplying] = useState(false);
-
-  const voteMutation = useMutation({
-    mutationFn: async ({ commentId, voteType }: { commentId: number; voteType: "upvote" | "downvote" }) => {
-      return await apiRequest("POST", `/api/comments/${commentId}/vote`, { voteType });
-    },
-    onError: () => {
-      // Revert optimistic update on error
-      setCurrentVote(userVote || null);
-      setVoteCount(comment.upvotes - comment.downvotes);
-
-      toast({
-        title: "Error",
-        description: "Failed to register vote. Please try again.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: () => {
-      // Invalidate queries that include this comment
-      queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
-    }
+  
+  // Get comment replies
+  const { data: replies } = useQuery<(Comment & { author?: User })[]>({
+    queryKey: [`/api/comments/${comment.id}/replies`],
+    enabled: showReplies,
   });
-
-  const handleVote = (voteType: "upvote" | "downvote") => {
-    if (!user) {
+  
+  const toggleReplies = async () => {
+    if (!showReplies && !replies) {
+      setIsLoadingReplies(true);
+    }
+    
+    setShowReplies(!showReplies);
+    setIsLoadingReplies(false);
+  };
+  
+  const handleVote = async (voteType: "upvote" | "downvote") => {
+    if (!currentUser) {
       toast({
-        title: "Login Required",
+        title: "Login required",
         description: "You need to be logged in to vote on comments",
         variant: "destructive",
       });
       return;
     }
-
-    // Optimistic update
-    if (currentVote === voteType) {
-      // Removing vote
-      setCurrentVote(null);
-      setVoteCount(voteType === "upvote" ? voteCount - 1 : voteCount + 1);
-    } else if (currentVote) {
-      // Changing vote
-      setCurrentVote(voteType);
-      setVoteCount(voteType === "upvote" ? voteCount + 2 : voteCount - 2);
-    } else {
-      // New vote
-      setCurrentVote(voteType);
-      setVoteCount(voteType === "upvote" ? voteCount + 1 : voteCount - 1);
+    
+    try {
+      const response = await apiRequest("POST", `/api/comments/${comment.id}/vote`, { voteType });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to vote");
+      }
+      
+      // Invalidate queries to refresh comment
+      queryClient.invalidateQueries({ queryKey: [`/api/posts/${comment.postId}/comments`] });
+      if (comment.parentId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/comments/${comment.parentId}/replies`] });
+      }
+      
+      toast({
+        title: "Vote recorded",
+        description: `Your ${voteType} has been recorded`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error voting",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
     }
-
-    voteMutation.mutate({ commentId: comment.id, voteType });
   };
-
+  
+  const handleReport = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Login required",
+        description: "You need to be logged in to report comments",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const response = await apiRequest("POST", `/api/comments/${comment.id}/report`);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to report comment");
+      }
+      
+      toast({
+        title: "Comment reported",
+        description: "Thank you for helping keep our community safe",
+      });
+    } catch (error) {
+      toast({
+        title: "Error reporting comment",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Determine if comment was AI-processed
+  const isAIProcessed = comment.status === "ai_processed";
+  
   return (
-    <div className="mb-3">
-      <div className="flex items-start">
-        <Avatar className="w-8 h-8 mt-1 mr-2">
-          <AvatarImage src={comment.author?.avatarUrl || ""} alt={comment.author?.username || "User"} />
+    <div className={`p-4 rounded-lg ${isAIProcessed ? 'bg-primary/5 border border-primary/10' : 'bg-white border border-light-border'}`}>
+      <div className="flex space-x-3">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={comment.author?.avatarUrl || ""} alt={comment.author?.username || ""} />
           <AvatarFallback>
-            {comment.author?.username?.substring(0, 2).toUpperCase() || "U"}
+            {comment.author?.username?.substring(0, 2).toUpperCase() || "??"}
           </AvatarFallback>
         </Avatar>
+        
         <div className="flex-1">
-          <div className="flex items-center mb-1">
-            <Link href={`/u/${comment.author?.username || "unknown"}`}>
-              <a className="font-medium text-xs hover:underline">
-                u/{comment.author?.username || "unknown"}
-              </a>
+          <div className="flex items-center space-x-2">
+            <Link href={`/u/${comment.author?.username}`} className="font-semibold text-dark hover:underline">
+              {comment.author?.displayName || comment.author?.username || "Unknown User"}
             </Link>
-            <span className="text-neutral text-xs ml-2">
-              {comment.createdAt
-                ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
-                : ""}
+            
+            {isAIProcessed && (
+              <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+                AI Enhanced
+              </span>
+            )}
+            
+            <span className="text-xs text-neutral">
+              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
           </div>
-          <p className="text-sm">{comment.content}</p>
-
-          {/* Comment Actions */}
-          <div className="flex items-center mt-1 text-xs text-neutral">
-            <button
-              className={`flex items-center hover:bg-light-darker rounded px-1 py-0.5 ${
-                currentVote === "upvote" ? "text-primary" : ""
-              }`}
-              onClick={() => handleVote("upvote")}
-            >
-              <ArrowUp className="h-3 w-3 mr-1" />
-              <span>{voteCount > 0 ? voteCount : ""}</span>
-            </button>
-            <button
-              className={`flex items-center hover:bg-light-darker rounded px-1 py-0.5 ml-1 ${
-                currentVote === "downvote" ? "text-primary" : ""
-              }`}
-              onClick={() => handleVote("downvote")}
-            >
-              <ArrowDown className="h-3 w-3" />
-            </button>
-            <button
-              className="hover:bg-light-darker rounded px-1 py-0.5 ml-2"
-              onClick={() => setIsReplying(!isReplying)}
-            >
-              <span className="flex items-center">
-                <Reply className="h-3 w-3 mr-1" />
-                Reply
-              </span>
-            </button>
-            <Button variant="ghost" className="hover:bg-light-darker rounded px-1 py-0.5 ml-2 h-auto">
-              <MoreHorizontal className="h-3 w-3" />
-            </Button>
+          
+          <div className="mt-2 text-neutral-dark whitespace-pre-line">
+            {comment.content}
           </div>
-
-          {/* Reply Form */}
-          {isReplying && (
-            <div className="mt-2">
-              <CreateComment
-                postId={postId}
-                parentId={comment.id}
-                onSuccess={() => setIsReplying(false)}
-              />
+          
+          <div className="mt-3 flex items-center space-x-4">
+            <div className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="px-2 py-1 text-neutral hover:text-primary"
+                onClick={() => handleVote("upvote")}
+              >
+                <ThumbsUp className="h-4 w-4 mr-1" />
+                <span className="text-xs">{comment.upvotes || 0}</span>
+              </Button>
             </div>
+            
+            <div className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="px-2 py-1 text-neutral hover:text-destructive"
+                onClick={() => handleVote("downvote")}
+              >
+                <ThumbsDown className="h-4 w-4 mr-1" />
+                <span className="text-xs">{comment.downvotes || 0}</span>
+              </Button>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`px-2 py-1 ${isReplying ? 'text-primary' : 'text-neutral hover:text-dark'}`}
+              onClick={onReplyClick}
+            >
+              <Reply className="h-4 w-4 mr-1" />
+              <span className="text-xs">Reply</span>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="px-2 py-1 text-neutral hover:text-dark"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={handleReport} className="text-destructive">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  <span>Report</span>
+                </DropdownMenuItem>
+                {currentUser?.id === comment.authorId && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* Show replies toggle */}
+          {comment.replyCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="mt-2 text-xs text-neutral hover:text-dark"
+              onClick={toggleReplies}
+              disabled={isLoadingReplies}
+            >
+              {isLoadingReplies ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                  Loading replies...
+                </>
+              ) : (
+                <>
+                  {showReplies ? "Hide" : "View"} {comment.replyCount} {comment.replyCount === 1 ? "reply" : "replies"}
+                </>
+              )}
+            </Button>
           )}
-
-          {/* Replies */}
-          {comment.replies && comment.replies.length > 0 && (
-            <div className="mt-3 pl-4 border-l border-light-border">
-              {comment.replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply} postId={postId} />
+          
+          {/* Replies section */}
+          {showReplies && replies && replies.length > 0 && (
+            <div className="mt-4 space-y-4">
+              {replies.map((reply) => (
+                <div key={reply.id} className="pl-4 border-l-2 border-light-border">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={reply.author?.avatarUrl || ""} alt={reply.author?.username || ""} />
+                    <AvatarFallback>
+                      {reply.author?.username?.substring(0, 2).toUpperCase() || "??"}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 mt-1">
+                    <div className="flex items-center space-x-2">
+                      <Link href={`/u/${reply.author?.username}`} className="font-semibold text-dark hover:underline">
+                        {reply.author?.displayName || reply.author?.username || "Unknown User"}
+                      </Link>
+                      
+                      {reply.status === "ai_processed" && (
+                        <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+                          AI Enhanced
+                        </span>
+                      )}
+                      
+                      <span className="text-xs text-neutral">
+                        {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-1 text-neutral-dark whitespace-pre-line">
+                      {reply.content}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
