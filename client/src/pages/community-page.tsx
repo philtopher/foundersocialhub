@@ -135,7 +135,7 @@ export default function CommunityPage() {
               <div className="bg-white rounded-lg border border-light-border p-8 text-center">
                 <h2 className="text-2xl font-bold mb-4">Community Not Found</h2>
                 <p className="text-neutral-dark mb-6">
-                  The community r/{communityName} doesn't exist or has been removed.
+                  The community {communityName} doesn't exist or has been removed.
                 </p>
                 <Button
                   onClick={() => navigate("/")}
@@ -174,7 +174,7 @@ export default function CommunityPage() {
               style={{ backgroundImage: `url('${community.iconUrl}')` }}
             />
             <div className="ml-4">
-              <h1 className="text-2xl font-bold">r/{community.name}</h1>
+              <h1 className="text-2xl font-bold">{community.name}</h1>
               <p className="text-neutral">{community.memberCount.toLocaleString()} members</p>
             </div>
             <div className="ml-auto">

@@ -20,12 +20,12 @@ export function LeftSidebar() {
         {/* Recommended Communities */}
         <div className="space-y-2">
           {communities?.slice(0, 5).map((community) => (
-            <Link key={community.id} href={`/r/${community.name}`} className="flex items-center p-2 rounded-md hover:bg-background">
+            <Link key={community.id} href={`/${community.name}`} className="flex items-center p-2 rounded-md hover:bg-background">
               <div 
                 className="community-icon mr-2" 
                 style={{ backgroundImage: `url('${community.iconUrl}')` }}
               ></div>
-              <span className="font-medium">r/{community.name}</span>
+              <span className="font-medium">{community.name}</span>
             </Link>
           ))}
           
@@ -36,21 +36,21 @@ export function LeftSidebar() {
                   className="community-icon mr-2" 
                   style={{ backgroundImage: `url('https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=48&h=48&q=80')` }}
                 ></div>
-                <span className="font-medium">r/startups</span>
+                <span className="font-medium">startups</span>
               </div>
               <div className="flex items-center p-2 rounded-md hover:bg-background">
                 <div 
                   className="community-icon mr-2" 
                   style={{ backgroundImage: `url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=48&h=48&q=80')` }}
                 ></div>
-                <span className="font-medium">r/entrepreneur</span>
+                <span className="font-medium">entrepreneur</span>
               </div>
               <div className="flex items-center p-2 rounded-md hover:bg-background">
                 <div 
                   className="community-icon mr-2" 
                   style={{ backgroundImage: `url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=48&h=48&q=80')` }}
                 ></div>
-                <span className="font-medium">r/producthunt</span>
+                <span className="font-medium">producthunt</span>
               </div>
             </>
           )}
