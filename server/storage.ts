@@ -110,7 +110,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     return await db.query.users.findFirst({
       where: eq(users.id, id)
     });
@@ -149,7 +149,7 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
-  async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
+  async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -161,7 +161,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserActiveStatus(userId: string, isActive: boolean): Promise<User> {
+  async updateUserActiveStatus(userId: number, isActive: boolean): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -173,7 +173,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserPaymentStatus(userId: string, status: string): Promise<User> {
+  async updateUserPaymentStatus(userId: number, status: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -185,7 +185,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User> {
+  async updateUserStripeInfo(userId: number, customerData: { customerId: string, subscriptionId?: string }): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -201,7 +201,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User> {
+  async updateUserPaypalInfo(userId: number, subscriptionId: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -216,7 +216,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async updateUserSubscriptionPlan(userId: string, planType: 'standard' | 'founder'): Promise<User> {
+  async updateUserSubscriptionPlan(userId: number, planType: 'standard' | 'founder'): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -402,7 +402,7 @@ export class DatabaseStorage implements IStorage {
     return postsWithRelations;
   }
   
-  async getSubscribedPosts(userId: string, sort: string, page: number, limit: number): Promise<Post[]> {
+  async getSubscribedPosts(userId: number, sort: string, page: number, limit: number): Promise<Post[]> {
     const offset = (page - 1) * limit;
     
     // Get communities the user is part of
@@ -508,7 +508,7 @@ export class DatabaseStorage implements IStorage {
     return postsWithRelations;
   }
   
-  async getUserPosts(userId: string, page: number, limit: number): Promise<Post[]> {
+  async getUserPosts(userId: number, page: number, limit: number): Promise<Post[]> {
     const offset = (page - 1) * limit;
     
     const postsData = await db.query.posts.findMany({
