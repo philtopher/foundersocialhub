@@ -131,8 +131,22 @@ export function Header() {
                     <Link href={`/u/${user.username}`}>
                       <DropdownMenuItem>Profile</DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem>My Communities</DropdownMenuItem>
+                    <Link href="/settings">
+                      <DropdownMenuItem>Settings</DropdownMenuItem>
+                    </Link>
+                    <Link href="/my-communities">
+                      <DropdownMenuItem>My Communities</DropdownMenuItem>
+                    </Link>
+                    {(user.subscriptionPlan === "standard" || user.subscriptionPlan === "founder") && (
+                      <Link href="/settings#taskflow">
+                        <DropdownMenuItem>
+                          <div className="flex items-center gap-2">
+                            <ExternalLink className="h-4 w-4" />
+                            <span>TaskFlowPro</span>
+                          </div>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => logoutMutation.mutate()}>Log out</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -232,6 +246,12 @@ export function Header() {
                     <Settings size={18} />
                     <span>Settings</span>
                   </Link>
+                  {(user.subscriptionPlan === "standard" || user.subscriptionPlan === "founder") && (
+                    <Link href="/settings#taskflow" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                      <ExternalLink size={18} />
+                      <span>TaskFlowPro</span>
+                    </Link>
+                  )}
                   <hr className="my-2 border-light-border" />
                   <button 
                     onClick={() => logoutMutation.mutate()} 
