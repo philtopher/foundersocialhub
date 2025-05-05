@@ -21,7 +21,7 @@ export const subscriptionPlanEnum = pgEnum("subscription_plan", [
 ]);
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey().notNull(), // Using string ID from Replit Auth
+  id: serial("id").primaryKey().notNull(),
   username: text("username").notNull().unique(),
   email: text("email").unique(),
   displayName: text("display_name"),
@@ -38,6 +38,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(false),
   directCommentsEnabled: boolean("direct_comments_enabled").default(false), // Skip AI workflow if true
   remainingPrompts: integer("remaining_prompts").default(3), // For non-founder users
+  password: text("password"), // Existing password field in db
 });
 
 
@@ -65,7 +66,7 @@ export const communities = pgTable("communities", {
   bannerUrl: text("banner_url"),
   visibility: communityVisibilityEnum("visibility").default("public").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  creatorId: text("creator_id").references(() => users.id).notNull(),
+  creatorId: integer("creator_id").references(() => users.id).notNull(),
   memberCount: integer("member_count").default(1).notNull(),
 });
 
@@ -87,7 +88,7 @@ export const communityRoleEnum = pgEnum("community_role", [
 
 export const communityMembers = pgTable("community_members", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   communityId: integer("community_id").references(() => communities.id).notNull(),
   role: communityRoleEnum("role").default("member").notNull(),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
@@ -99,7 +100,7 @@ export const posts = pgTable("posts", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
-  authorId: text("author_id").references(() => users.id).notNull(),
+  authorId: integer("author_id").references(() => users.id).notNull(),
   communityId: integer("community_id").references(() => communities.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -127,7 +128,7 @@ export const commentStatusEnum = pgEnum("comment_status", [
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  authorId: text("author_id").references(() => users.id).notNull(),
+  authorId: integer("author_id").references(() => users.id).notNull(),
   postId: integer("post_id").references(() => posts.id).notNull(),
   parentId: integer("parent_id").references(() => comments.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -156,7 +157,7 @@ export const voteTypeEnum = pgEnum("vote_type", ["upvote", "downvote"]);
 
 export const postVotes = pgTable("post_votes", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   postId: integer("post_id").references(() => posts.id).notNull(),
   voteType: voteTypeEnum("vote_type").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -164,7 +165,7 @@ export const postVotes = pgTable("post_votes", {
 
 export const commentVotes = pgTable("comment_votes", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   commentId: integer("comment_id").references(() => comments.id).notNull(),
   voteType: voteTypeEnum("vote_type").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -271,8 +272,8 @@ export const collaborationEnvironments = pgTable("collaboration_environments", {
   id: serial("id").primaryKey(),
   postId: integer("post_id").references(() => posts.id).notNull(),
   commentId: integer("comment_id").references(() => comments.id).notNull(),
-  creatorId: text("creator_id").references(() => users.id).notNull(),
-  postAuthorId: text("post_author_id").references(() => users.id).notNull(),
+  creatorId: integer("creator_id").references(() => users.id).notNull(),
+  postAuthorId: integer("post_author_id").references(() => users.id).notNull(),
   title: text("title").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(), // Auto-expires after 3 days
@@ -295,7 +296,7 @@ export const processFlows = pgTable("process_flows", {
 export const collaborationMessages = pgTable("collaboration_messages", {
   id: serial("id").primaryKey(),
   environmentId: integer("environment_id").references(() => collaborationEnvironments.id).notNull(),
-  authorId: text("author_id").references(() => users.id).notNull(),
+  authorId: integer("author_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   isAiGenerated: boolean("is_ai_generated").default(false),
