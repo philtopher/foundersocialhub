@@ -170,6 +170,11 @@ export default function AuthPage() {
                         Sign up
                       </Button>
                     </div>
+                    <div className="text-sm text-neutral">
+                      <Link href="/forgot-password">
+                        <Button variant="link" className="p-0 h-auto">Forgot password?</Button>
+                      </Link>
+                    </div>
                   </CardFooter>
                 </Card>
               </TabsContent>

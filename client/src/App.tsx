@@ -8,6 +8,8 @@ import CreatePostPage from "@/pages/create-post-page";
 import UserProfilePage from "@/pages/user-profile-page";
 import PaymentPage from "@/pages/payment-page";
 import PaymentSuccessPage from "@/pages/payment-success-page";
+import ForgotPasswordPage from "@/pages/forgot-password-page";
+import ResetPasswordPage from "@/pages/reset-password-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
@@ -15,6 +17,8 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/r/:communityName" component={CommunityPage} />
       <Route path="/r/:communityName/post/:postId" component={PostDetailPage} />
       <ProtectedRoute path="/r/:communityName/submit" component={CreatePostPage} />
