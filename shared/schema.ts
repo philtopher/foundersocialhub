@@ -14,6 +14,12 @@ export const sessions = pgTable(
 );
 
 // Users
+// Subscription plan types
+export const subscriptionPlanEnum = pgEnum("subscription_plan", [
+  "standard",
+  "founder",
+]);
+
 export const users = pgTable("users", {
   id: text("id").primaryKey().notNull(), // Using string ID from Replit Auth
   username: text("username").notNull().unique(),
@@ -28,6 +34,7 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   paypalSubscriptionId: text("paypal_subscription_id"),
+  subscriptionPlan: subscriptionPlanEnum("subscription_plan").default("standard"),
   isActive: boolean("is_active").default(false),
 });
 
