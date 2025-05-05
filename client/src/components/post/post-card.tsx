@@ -103,15 +103,15 @@ export function PostCard({ post, userVote }: PostCardProps) {
                   className="community-icon mr-1" 
                   style={{ backgroundImage: `url('${post.community.iconUrl}')` }}
                 ></div>
-                <Link href={`/r/${post.community.name}`}>
-                  <a className="font-medium hover:underline">r/{post.community.name}</a>
+                <Link href={`/r/${post.community.name}`} className="font-medium hover:underline">
+                  r/{post.community.name}
                 </Link>
                 <span className="mx-1 text-neutral">•</span>
               </>
             )}
             <span className="text-neutral">Posted by</span>
-            <Link href={`/u/${post.author?.username || "unknown"}`}>
-              <a className="ml-1 hover:underline">u/{post.author?.username || "unknown"}</a>
+            <Link href={`/u/${post.author?.username || "unknown"}`} className="ml-1 hover:underline">
+              u/{post.author?.username || "unknown"}
             </Link>
             <span className="mx-1 text-neutral">•</span>
             <span className="text-neutral">
@@ -121,8 +121,8 @@ export function PostCard({ post, userVote }: PostCardProps) {
           
           {/* Post Title */}
           <h2 className="text-lg font-medium mb-2">
-            <Link href={`/r/${post.community?.name || "unknown"}/post/${post.id}`}>
-              <a className="hover:underline">{post.title}</a>
+            <Link href={`/r/${post.community?.name || "unknown"}/post/${post.id}`} className="hover:underline">
+              {post.title}
             </Link>
           </h2>
           
@@ -140,11 +140,9 @@ export function PostCard({ post, userVote }: PostCardProps) {
           
           {/* Post Actions */}
           <div className="flex items-center text-neutral text-sm">
-            <Link href={`/r/${post.community?.name || "unknown"}/post/${post.id}`}>
-              <a className="flex items-center px-2 py-1 rounded-md hover:bg-light-darker">
-                <MessageSquare className="h-4 w-4 mr-1" />
-                <span>{post.commentCount} Comments</span>
-              </a>
+            <Link href={`/r/${post.community?.name || "unknown"}/post/${post.id}`} className="flex items-center px-2 py-1 rounded-md hover:bg-light-darker">
+              <MessageSquare className="h-4 w-4 mr-1" />
+              <span>{post.commentCount} Comments</span>
             </Link>
             <button className="flex items-center px-2 py-1 rounded-md hover:bg-light-darker ml-2">
               <Share2 className="h-4 w-4 mr-1" />
