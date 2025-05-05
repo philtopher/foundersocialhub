@@ -13,6 +13,7 @@ import ResetPasswordPage from "@/pages/reset-password-page";
 import SettingsPage from "@/pages/settings-page";
 import SavedPage from "@/pages/saved-page";
 import MyCommunitiesPage from "@/pages/my-communities-page";
+import HowItWorksPage from "@/pages/how-it-works-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/my-communities" component={MyCommunitiesPage} />
+      <Route path="/how-it-works" component={HowItWorksPage} />
       <Route component={NotFound} />
     </Switch>
   );

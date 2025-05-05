@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut } from "lucide-react";
+import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut, HelpCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,6 +138,10 @@ export function Header() {
               </>
             ) : (
               <div className="flex items-center space-x-3">
+                <Link href="/how-it-works" className="hidden md:flex items-center space-x-1 text-neutral hover:text-dark mr-2">
+                  <HelpCircle size={16} />
+                  <span>How It Works</span>
+                </Link>
                 <Link href="/auth">
                   <Button variant="default" className="px-4 py-1.5 rounded-full bg-primary text-white hover:bg-primary-hover hidden md:block">
                     Sign Up
@@ -199,6 +203,10 @@ export function Header() {
               <Link href="/explore" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
                 <Compass size={18} />
                 <span>Explore</span>
+              </Link>
+              <Link href="/how-it-works" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                <HelpCircle size={18} />
+                <span>How It Works</span>
               </Link>
               {user && (
                 <>
