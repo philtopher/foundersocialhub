@@ -2,6 +2,8 @@ import { db } from "@db";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { Pool } from "@neondatabase/serverless";
+import crypto from "crypto";
+import { promisify } from "util";
 import { 
   users, 
   communities, 
@@ -24,6 +26,14 @@ import {
 import { eq, and, or, desc, asc, gt, lt, sql, isNull, inArray } from "drizzle-orm";
 
 const PostgresSessionStore = connectPg(session);
+
+// Password hashing function
+async function hashPassword(password: string) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const scryptAsync = promisify(crypto.scrypt);
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString('hex')}.${salt}`;
+}
 
 export interface IStorage {
   // User methods

@@ -24,7 +24,8 @@ import {
 import { 
   sendPaymentConfirmationEmail, 
   sendPaymentFailedEmail,
-  sendWelcomeEmail 
+  sendWelcomeEmail,
+  sendPasswordResetEmail
 } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -556,6 +557,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching payment status:", error);
       res.status(500).json({ message: "Failed to fetch payment status" });
+    }
+  });
+
+  // Password reset routes
+  app.post("/api/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Create password reset token
+      const token = await storage.createPasswordResetToken(email);
+      
+      if (!token) {
+        // Don't reveal whether email exists for security
+        return res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+      }
+      
+      // Send password reset email
+      await sendPasswordResetEmail(email, token);
+      
+      return res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Error in forgot password:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token and password are required" });
+      }
+      
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      
+      // Reset password
+      const success = await storage.resetPassword(token, password);
+      
+      if (!success) {
+        return res.status(400).json({ message: "Invalid or expired token" });
+      }
+      
+      return res.status(200).json({ message: "Password has been reset successfully" });
+    } catch (error) {
+      console.error("Error in reset password:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

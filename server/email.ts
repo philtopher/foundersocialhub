@@ -71,6 +71,36 @@ export async function sendPaymentConfirmationEmail(user: User): Promise<boolean>
   });
 }
 
+// Password reset email
+export async function sendPasswordResetEmail(email: string, token: string): Promise<boolean> {
+  if (!email) {
+    console.warn('Cannot send password reset email: No email provided');
+    return false;
+  }
+
+  const resetUrl = `${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000'}/reset-password?token=${token}`;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #4f46e5;">Reset Your Password</h1>
+      <p>You requested a password reset for your FounderSocials account.</p>
+      <p>Please click the button below to set a new password. This link will expire in 1 hour.</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
+      </div>
+      <p>If you did not request this password reset, please ignore this email or contact our support team if you have concerns.</p>
+      <p style="margin-top: 30px;">Best regards,<br>The FounderSocials Team</p>
+    </div>
+  `;
+  
+  return await sendEmail({
+    to: email,
+    from: 'noreply@foundersocials.com',
+    subject: 'FounderSocials - Password Reset Request',
+    html,
+  });
+}
+
 // Welcome email sent after registration
 export async function sendWelcomeEmail(user: User): Promise<boolean> {
   if (!user.email) {
