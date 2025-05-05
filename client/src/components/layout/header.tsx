@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Search, Bell, MessageSquare, Plus, Menu } from "lucide-react";
+import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,18 +13,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export function Header() {
   const { user, logoutMutation } = useAuth();
   const isMobile = useMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close the menu when clicking outside of it
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuRef]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
     }
+  };
+  
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   return (
@@ -132,13 +152,104 @@ export function Header() {
             )}
             
             {isMobile && (
-              <Button variant="ghost" size="icon" className="md:hidden text-neutral hover:text-dark">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="md:hidden text-neutral hover:text-dark"
+                onClick={toggleMobileMenu}
+              >
                 <Menu size={20} />
               </Button>
             )}
           </div>
         </div>
       </div>
+      
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div 
+          ref={mobileMenuRef}
+          className="md:hidden fixed top-14 right-0 w-64 bg-white border-l border-light-border shadow-lg h-full z-50 overflow-y-auto"
+        >
+          <div className="p-4">
+            {isMobile && (
+              <div className="mb-4">
+                <form onSubmit={handleSearch} className="w-full">
+                  <div className="relative w-full">
+                    <Input
+                      type="text"
+                      placeholder="Search"
+                      className="w-full pl-10 pr-4 py-2 rounded-full border border-light-border bg-light"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div className="absolute left-3 top-2.5 text-neutral">
+                      <Search size={16} />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            )}
+            
+            <div className="space-y-1">
+              <Link href="/" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                <Home size={18} />
+                <span>Home</span>
+              </Link>
+              <Link href="/explore" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                <Compass size={18} />
+                <span>Explore</span>
+              </Link>
+              {user && (
+                <>
+                  <Link href="/notifications" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                    <Bell size={18} />
+                    <span>Notifications</span>
+                  </Link>
+                  <Link href="/submit" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                    <Plus size={18} />
+                    <span>Create Post</span>
+                  </Link>
+                  <Link href="/saved" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                    <Bookmark size={18} />
+                    <span>Saved</span>
+                  </Link>
+                  <Link href="/my-communities" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                    <Users size={18} />
+                    <span>My Communities</span>
+                  </Link>
+                  <Link href="/settings" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                    <Settings size={18} />
+                    <span>Settings</span>
+                  </Link>
+                  <hr className="my-2 border-light-border" />
+                  <button 
+                    onClick={() => logoutMutation.mutate()} 
+                    className="w-full flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-destructive"
+                  >
+                    <LogOut size={18} />
+                    <span>Log Out</span>
+                  </button>
+                </>
+              )}
+              {!user && (
+                <div className="mt-4 flex flex-col space-y-2">
+                  <Link href="/auth" className="w-full">
+                    <Button variant="default" className="w-full rounded-full bg-primary text-white hover:bg-primary-hover">
+                      Sign Up
+                    </Button>
+                  </Link>
+                  <Link href="/auth" className="w-full">
+                    <Button variant="outline" className="w-full rounded-full border border-primary text-primary hover:bg-light-darker">
+                      Log In
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
