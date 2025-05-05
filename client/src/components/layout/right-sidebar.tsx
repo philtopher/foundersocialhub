@@ -15,9 +15,9 @@ export function RightSidebar() {
   return (
     <aside className="hidden md:block w-72 flex-shrink-0">
       {/* Community Creation Card */}
-      <div className="bg-white rounded-lg border border-light-border p-4 mb-4">
+      <div className="bg-white rounded-lg border border-border p-4 mb-4">
         <h3 className="font-bold text-lg mb-2">Create a Community</h3>
-        <p className="text-sm text-neutral-dark mb-3">Start your own community for founders with similar interests.</p>
+        <p className="text-sm text-muted-foreground mb-3">Start your own community for founders with similar interests.</p>
         <Button 
           className="w-full bg-primary hover:bg-primary-hover text-white font-medium rounded-full py-2"
           onClick={() => {
@@ -60,29 +60,19 @@ export function RightSidebar() {
             <span>Ad-free browsing experience</span>
           </li>
         </ul>
-        <Button className="w-full bg-white text-accent hover:bg-light font-medium rounded-full py-2">
+        <Button className="w-full bg-white text-accent hover:bg-background font-medium rounded-full py-2">
           Try Premium
         </Button>
       </div>
       
       {/* Footer Links */}
-      <div className="text-xs text-neutral">
+      <div className="text-xs text-muted-foreground">
         <div className="flex flex-wrap gap-2 mb-3">
-          <Link href="/about">
-            <a className="hover:underline">About</a>
-          </Link>
-          <Link href="/terms">
-            <a className="hover:underline">Terms</a>
-          </Link>
-          <Link href="/privacy">
-            <a className="hover:underline">Privacy Policy</a>
-          </Link>
-          <Link href="/content-policy">
-            <a className="hover:underline">Content Policy</a>
-          </Link>
-          <Link href="/moderator-code">
-            <a className="hover:underline">Moderator Code</a>
-          </Link>
+          <Link href="/about" className="hover:underline">About</Link>
+          <Link href="/terms" className="hover:underline">Terms</Link>
+          <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+          <Link href="/content-policy" className="hover:underline">Content Policy</Link>
+          <Link href="/moderator-code" className="hover:underline">Moderator Code</Link>
         </div>
         <p>© {new Date().getFullYear()} FounderSocials. All rights reserved.</p>
       </div>
