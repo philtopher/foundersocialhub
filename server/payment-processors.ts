@@ -273,14 +273,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
               
               // Update the user's subscription plan type in the database
               if (isFounderPlan) {
-                await db.update(users)
-                  .set({ subscriptionPlan: 'founder' })
-                  .where(eq(users.id, user.id));
+                await storage.updateUserSubscriptionPlan(user.id, 'founder');
                 console.log(`User ${user.id} upgraded to Founder plan`);
               } else {
-                await db.update(users)
-                  .set({ subscriptionPlan: 'standard' })
-                  .where(eq(users.id, user.id));
+                await storage.updateUserSubscriptionPlan(user.id, 'standard');
                 console.log(`User ${user.id} on Standard plan`);
               }
             } else if (updatedSubscription.status === 'canceled' || 
