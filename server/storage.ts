@@ -32,6 +32,9 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(userData: UpsertUser): Promise<User>;
+  updateUserPaymentStatus(userId: string, status: string): Promise<User>;
+  updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
+  updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User>;
   
   // Community methods
   createCommunity(communityData: InsertCommunity): Promise<Community>;
@@ -134,6 +137,49 @@ export class DatabaseStorage implements IStorage {
     return await db.query.users.findFirst({
       where: eq(users.email, email)
     });
+  }
+  
+  async updateUserPaymentStatus(userId: string, status: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        paymentStatus: status,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+  
+  async updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        stripeCustomerId: customerData.customerId,
+        stripeSubscriptionId: customerData.subscriptionId,
+        isPremium: true,
+        isActive: true,
+        paymentStatus: "completed",
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+  
+  async updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        paypalSubscriptionId: subscriptionId,
+        isPremium: true,
+        isActive: true,
+        paymentStatus: "completed",
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
   
   // Community methods

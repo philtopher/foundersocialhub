@@ -24,6 +24,11 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   isPremium: boolean("is_premium").default(false),
+  paymentStatus: text("payment_status").default("pending"), // pending, completed, failed
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  paypalSubscriptionId: text("paypal_subscription_id"),
+  isActive: boolean("is_active").default(false),
 });
 
 export const insertUserSchema = createInsertSchema(users, {
