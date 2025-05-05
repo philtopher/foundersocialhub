@@ -1,16 +1,23 @@
+import { Route, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Redirect, Route, useLocation } from "wouter";
 
 export function ProtectedRoute({
   path,
   component: Component,
 }: {
   path: string;
-  component: React.ComponentType<any>;
+  component: () => React.JSX.Element;
 }) {
   const { user, isLoading } = useAuth();
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setLocation("/auth");
+    }
+  }, [user, isLoading, setLocation]);
 
   return (
     <Route path={path}>
@@ -20,9 +27,7 @@ export function ProtectedRoute({
         </div>
       ) : user ? (
         <Component />
-      ) : (
-        <Redirect to={`/auth?redirect=${encodeURIComponent(location)}`} />
-      )}
+      ) : null}
     </Route>
   );
 }
