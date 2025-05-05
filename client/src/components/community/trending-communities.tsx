@@ -24,7 +24,7 @@ export function TrendingCommunities() {
   };
   
   return (
-    <div className="bg-white rounded-lg border border-light-border p-4 mb-4">
+    <div className="bg-white rounded-lg border border-border p-4 mb-4">
       <h3 className="font-bold text-lg mb-3">Trending Communities</h3>
       
       {isLoading ? (
@@ -52,9 +52,7 @@ export function TrendingCommunities() {
         </div>
       )}
       
-      <Link href="/communities">
-        <a className="text-secondary hover:underline text-sm block mt-3">See More Communities</a>
-      </Link>
+      <Link href="/communities" className="text-secondary hover:underline text-sm block mt-3">See More Communities</Link>
     </div>
   );
 }

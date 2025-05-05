@@ -84,27 +84,23 @@ export function CommunityCard({ community, isMember = false }: CommunityCardProp
 
   return (
     <div className="flex items-start">
-      <Link href={`/r/${community.name}`}>
-        <a className="block">
-          <div 
-            className="community-icon mt-1" 
-            style={{ backgroundImage: `url('${community.iconUrl}')` }}
-          ></div>
-        </a>
+      <Link href={`/r/${community.name}`} className="block">
+        <div 
+          className="community-icon mt-1" 
+          style={{ backgroundImage: `url('${community.iconUrl}')` }}
+        ></div>
       </Link>
       <div className="ml-2">
-        <Link href={`/r/${community.name}`}>
-          <a className="font-medium hover:underline">r/{community.name}</a>
-        </Link>
-        <p className="text-xs text-neutral">{formatMemberCount(community.memberCount)} members</p>
+        <Link href={`/r/${community.name}`} className="font-medium hover:underline">r/{community.name}</Link>
+        <p className="text-xs text-muted">{formatMemberCount(community.memberCount)} members</p>
       </div>
       <Button
         variant={isMember ? "outline" : "outline"}
         size="sm"
         className={`ml-auto text-xs px-4 py-1 rounded-full 
           ${isMember 
-            ? "border-neutral-light text-neutral hover:bg-light-darker" 
-            : "border-primary text-primary hover:bg-light-darker"
+            ? "border-border text-muted hover:bg-background" 
+            : "border-primary text-primary hover:bg-background"
           }`}
         onClick={handleJoinToggle}
         disabled={joinMutation.isPending || leaveMutation.isPending}
