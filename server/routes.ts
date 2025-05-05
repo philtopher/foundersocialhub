@@ -35,6 +35,17 @@ import {
 } from "./email";
 import Stripe from "stripe";
 import { db } from "@db";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+// Password hashing function
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes
