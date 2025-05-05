@@ -1,77 +1,154 @@
-import { useEffect } from "react";
-import { useLocation } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "wouter";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function PaymentSuccessPage() {
-  const [_, navigate] = useLocation();
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   
-  // Check payment status on component mount
   useEffect(() => {
-    const verifyPayment = async () => {
+    const checkPaymentStatus = async () => {
       try {
-        // Update the payment status cache
-        queryClient.invalidateQueries({ queryKey: ["/api/payments/status"] });
-      } catch (error) {
-        console.error("Error verifying payment:", error);
+        setLoading(true);
+        
+        const response = await apiRequest("GET", "/api/payments/status");
+        const data = await response.json();
+        
+        setPaymentStatus(data.paymentStatus);
+        // Clear any previous errors
+        setError(null);
+        
+        // Invalidate user query to refresh user data
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      } catch (error: any) {
+        console.error("Error checking payment status:", error);
+        setError(error.message || "Failed to check payment status");
+      } finally {
+        setLoading(false);
       }
     };
     
-    if (user) {
-      verifyPayment();
-    }
-  }, [user]);
+    // Check status on initial load
+    checkPaymentStatus();
+    
+    // Poll every 5 seconds to check for updates
+    const intervalId = setInterval(checkPaymentStatus, 5000);
+    
+    // Clean up interval when component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
   
-  const handleContinue = () => {
-    navigate("/");
+  const getStatusMessage = () => {
+    if (loading) {
+      return "Checking payment status...";
+    }
+    
+    if (error) {
+      return `Error: ${error}`;
+    }
+    
+    switch (paymentStatus) {
+      case "completed":
+        return "Your payment has been successfully processed!";
+      case "pending":
+        return "Your payment is being processed. This may take a moment.";
+      case "failed":
+        return "There was an issue processing your payment. Please try again.";
+      default:
+        return "Unknown payment status. Please contact support if this persists.";
+    }
+  };
+  
+  const getCardContent = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 space-y-4">
+          <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          <p className="text-xl">Processing payment...</p>
+        </div>
+      );
+    }
+    
+    if (paymentStatus === "completed") {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 space-y-6">
+          <CheckCircle className="w-16 h-16 text-green-500" />
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold">Payment Successful!</h2>
+            <p className="text-muted-foreground">Your account has been upgraded to premium.</p>
+          </div>
+          <div className="space-y-2 text-center">
+            <p>You now have access to all premium features:</p>
+            <ul className="list-disc list-inside text-left space-y-1">
+              <li>Create unlimited communities</li>
+              <li>Advanced analytics</li>
+              <li>Priority support</li>
+              <li>Ad-free experience</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+    
+    if (paymentStatus === "pending") {
+      return (
+        <div className="flex flex-col items-center justify-center py-8 space-y-6">
+          <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold">Payment Processing</h2>
+            <p className="text-muted-foreground">Your payment is being processed. This page will update automatically.</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex flex-col items-center justify-center py-8 space-y-6">
+        <AlertCircle className="w-16 h-16 text-destructive" />
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold">Payment Issue</h2>
+          <p className="text-muted-foreground">{getStatusMessage()}</p>
+        </div>
+      </div>
+    );
   };
   
   return (
-    <div className="container max-w-md mx-auto py-16">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </div>
-          <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+    <div className="container max-w-3xl py-16">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Payment Status</CardTitle>
           <CardDescription>
-            Thank you for subscribing to FounderSocials Premium.
+            Check the status of your subscription payment
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-center">
-            Your account has been upgraded and you now have access to all premium features. 
-            You will receive a confirmation email shortly.
-          </p>
-          
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-medium text-blue-800 mb-2">What's next?</h3>
-            <ul className="space-y-2 text-sm text-blue-700">
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="mr-2 mt-0.5"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
-                <span>Create your first private community</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="mr-2 mt-0.5"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
-                <span>Customize your profile with premium options</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="mr-2 mt-0.5"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
-                <span>Explore community analytics dashboard</span>
-              </li>
-            </ul>
-          </div>
-          
-          <Button 
-            onClick={handleContinue} 
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-          >
-            Continue to Dashboard
-          </Button>
+        
+        <CardContent>
+          {getCardContent()}
         </CardContent>
+        
+        <CardFooter className="flex justify-center">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild>
+              <Link to="/">
+                Go to Home
+              </Link>
+            </Button>
+            {paymentStatus !== "completed" && (
+              <Button variant="outline" asChild>
+                <Link to="/payment">
+                  Try Again
+                </Link>
+              </Button>
+            )}
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

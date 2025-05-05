@@ -158,35 +158,115 @@ export async function handleStripeWebhook(req: Request, res: Response) {
   }
   
   // Handle the event
-  switch (event.type) {
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      // Update payment status to completed
-      // Find user by customer ID and update
-      console.log('Payment succeeded:', paymentIntent.id);
-      break;
-      
-    case 'subscription.created':
-      const subscription = event.data.object;
-      console.log('Subscription created:', subscription.id);
-      break;
-      
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted':
-      const updatedSubscription = event.data.object;
-      // Handle subscription status changes
-      console.log(`Subscription ${event.type}:`, updatedSubscription.id);
-      
-      // If subscription is active, update user status
-      if (updatedSubscription.status === 'active') {
-        // Find user by customer ID and update
-        // We would normally do a lookup to find the user with this customer ID
-        // and update their subscription status
-      }
-      break;
-      
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+  try {
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log('Payment succeeded:', paymentIntent.id);
+        
+        // If there's a customer, update their payment status
+        if (paymentIntent.customer) {
+          const customer = typeof paymentIntent.customer === 'string' 
+            ? paymentIntent.customer 
+            : paymentIntent.customer.id;
+            
+          // Find the user with this customer ID
+          const user = await storage.getUserByStripeCustomerId(customer);
+          
+          if (user) {
+            await storage.updateUserPaymentStatus(user.id, "completed");
+          }
+        }
+        break;
+        
+      case 'invoice.payment_succeeded':
+        const invoice = event.data.object as Stripe.Invoice;
+        console.log('Invoice payment succeeded:', invoice.id);
+        
+        if (invoice.customer && invoice.subscription) {
+          const customer = typeof invoice.customer === 'string' 
+            ? invoice.customer 
+            : invoice.customer.id;
+            
+          const subscriptionId = typeof invoice.subscription === 'string'
+            ? invoice.subscription
+            : invoice.subscription.id;
+            
+          // Find the user with this customer ID
+          const user = await storage.getUserByStripeCustomerId(customer);
+          
+          if (user) {
+            // Update user with active premium subscription
+            await storage.updateUserStripeInfo(user.id, { 
+              customerId: customer,
+              subscriptionId 
+            });
+            
+            await storage.updateUserPaymentStatus(user.id, "completed");
+            await storage.updateUserPremiumStatus(user.id, true);
+            await storage.updateUserActiveStatus(user.id, true);
+          }
+        }
+        break;
+        
+      case 'customer.subscription.created':
+        const newSubscription = event.data.object as Stripe.Subscription;
+        console.log('Subscription created:', newSubscription.id);
+        break;
+        
+      case 'customer.subscription.updated':
+        const updatedSubscription = event.data.object as Stripe.Subscription;
+        console.log('Subscription updated:', updatedSubscription.id);
+        
+        if (updatedSubscription.customer) {
+          const customer = typeof updatedSubscription.customer === 'string' 
+            ? updatedSubscription.customer 
+            : updatedSubscription.customer.id;
+          
+          // Find the user with this customer ID
+          const user = await storage.getUserByStripeCustomerId(customer);
+          
+          if (user) {
+            // Update user's subscription status based on the subscription status
+            if (updatedSubscription.status === 'active') {
+              await storage.updateUserPremiumStatus(user.id, true);
+              await storage.updateUserActiveStatus(user.id, true);
+            } else if (updatedSubscription.status === 'canceled' || 
+                       updatedSubscription.status === 'unpaid' || 
+                       updatedSubscription.status === 'incomplete_expired') {
+              await storage.updateUserPremiumStatus(user.id, false);
+              // Don't deactivate the account, just remove premium status
+            }
+          }
+        }
+        break;
+        
+      case 'customer.subscription.deleted':
+        const deletedSubscription = event.data.object as Stripe.Subscription;
+        console.log('Subscription deleted:', deletedSubscription.id);
+        
+        if (deletedSubscription.customer) {
+          const customer = typeof deletedSubscription.customer === 'string' 
+            ? deletedSubscription.customer 
+            : deletedSubscription.customer.id;
+          
+          // Find the user with this customer ID
+          const user = await storage.getUserByStripeCustomerId(customer);
+          
+          if (user) {
+            // Remove premium status but keep account active
+            await storage.updateUserPremiumStatus(user.id, false);
+          }
+        }
+        break;
+        
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+  } catch (error) {
+    console.error('Error processing webhook event:', error);
+    // Still return 200 to acknowledge receipt even on processing error
+    // This prevents Stripe from retrying the webhook unnecessarily
   }
   
   // Return a 200 response to acknowledge receipt of the event

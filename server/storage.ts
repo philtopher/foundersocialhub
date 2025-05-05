@@ -31,8 +31,11 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  upsertUser(userData: UpsertUser): Promise<User>;
+  getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
+  upsertUser(userData: InsertUser): Promise<User>;
   updateUserPaymentStatus(userId: string, status: string): Promise<User>;
+  updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
+  updateUserActiveStatus(userId: string, isActive: boolean): Promise<User>;
   updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
   updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User>;
   
@@ -112,7 +115,7 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async upsertUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -137,6 +140,36 @@ export class DatabaseStorage implements IStorage {
     return await db.query.users.findFirst({
       where: eq(users.email, email)
     });
+  }
+  
+  async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
+    return await db.query.users.findFirst({
+      where: eq(users.stripeCustomerId, customerId)
+    });
+  }
+  
+  async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isPremium,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+  
+  async updateUserActiveStatus(userId: string, isActive: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isActive,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
   
   async updateUserPaymentStatus(userId: string, status: string): Promise<User> {
