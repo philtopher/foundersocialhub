@@ -836,6 +836,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+  
+  // User profile routes
+  app.get("/api/profile", isAuthenticated, async (req, res) => {
+    try {
+      const userId = Number(req.user!.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Exclude sensitive information
+      const { password, resetToken, resetTokenExpiry, ...profile } = user;
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+  
+  app.patch("/api/profile", isAuthenticated, async (req, res) => {
+    try {
+      const userId = Number(req.user!.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Only allow updating specific profile fields
+      const { displayName, bio, avatarUrl } = req.body;
+      
+      const [updatedUser] = await db.update(users)
+        .set({
+          displayName: displayName === "" ? null : displayName,
+          bio: bio === "" ? null : bio,
+          avatarUrl: avatarUrl === "" ? null : avatarUrl,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      // Exclude sensitive information
+      const { password, resetToken, resetTokenExpiry, ...profile } = updatedUser;
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+  
+  // User account routes
+  app.patch("/api/account", isAuthenticated, async (req, res) => {
+    try {
+      const userId = Number(req.user!.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { username, email, password, phone, directCommentsEnabled } = req.body;
+      
+      // Check if username is being changed and is unique
+      if (username && username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Username already taken" });
+        }
+      }
+      
+      // Check if email is being changed and is unique
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      }
+      
+      // Build update object
+      const updateData: any = {
+        username: username || user.username,
+        email: email || user.email,
+        updatedAt: new Date()
+      };
+      
+      // Only include password if it's being changed
+      if (password) {
+        if (password.length < 8) {
+          return res.status(400).json({ message: "Password must be at least 8 characters long" });
+        }
+        updateData.password = await hashPassword(password);
+      }
+      
+      // Only allow premium users to update phone and directCommentsEnabled
+      if (user.isPremium) {
+        if (phone !== undefined) {
+          updateData.phone = phone === "" ? null : phone;
+        }
+        
+        if (directCommentsEnabled !== undefined) {
+          updateData.directCommentsEnabled = directCommentsEnabled;
+        }
+      }
+      
+      const [updatedUser] = await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+      
+      // Exclude sensitive information
+      const { password: _, resetToken, resetTokenExpiry, ...account } = updatedUser;
+      
+      res.json(account);
+    } catch (error) {
+      console.error("Error updating user account:", error);
+      res.status(500).json({ message: "Failed to update user account" });
+    }
+  });
+  
+  // User avatar upload route
+  app.post("/api/uploads/avatar", isAuthenticated, async (req, res) => {
+    // This is a placeholder for file upload functionality
+    // In a real implementation, this would handle the file upload
+    // and return a URL to the uploaded file
+    
+    // For now, just return a sample URL
+    res.json({ url: "https://avatars.githubusercontent.com/u/1680273?v=4" });
+  });
 
   // Test email endpoints - only for development
   if (process.env.NODE_ENV !== "production") {

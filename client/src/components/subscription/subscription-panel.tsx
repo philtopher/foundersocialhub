@@ -1,16 +1,99 @@
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
+import { Shield, Zap, Award, BarChart, MessageSquare, CreditCard, X, Sparkles, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+
+interface SubscriptionFeature {
+  name: string;
+  free: boolean;
+  standard: boolean;
+  founder: boolean;
+  icon: React.ReactNode;
+}
+
+const features: SubscriptionFeature[] = [
+  {
+    name: "Create and join communities",
+    free: true,
+    standard: true,
+    founder: true,
+    icon: <Shield className="h-4 w-4" />,
+  },
+  {
+    name: "Basic posting and commenting",
+    free: true,
+    standard: true,
+    founder: true,
+    icon: <MessageSquare className="h-4 w-4" />,
+  },
+  {
+    name: "AI-moderated comments",
+    free: false,
+    standard: true,
+    founder: true,
+    icon: <Sparkles className="h-4 w-4" />,
+  },
+  {
+    name: "3 AI prompts per day",
+    free: false,
+    standard: true,
+    founder: false,
+    icon: <BarChart className="h-4 w-4" />,
+  },
+  {
+    name: "10 AI prompts per day",
+    free: false,
+    standard: false,
+    founder: true,
+    icon: <BarChart className="h-4 w-4" />,
+  },
+  {
+    name: "Collaborate with any user",
+    free: false,
+    standard: false,
+    founder: true,
+    icon: <Award className="h-4 w-4" />,
+  },
+  {
+    name: "Premium profile features",
+    free: false,
+    standard: true,
+    founder: true,
+    icon: <Zap className="h-4 w-4" />,
+  },
+];
 
 export function SubscriptionPanel() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, navigate] = useLocation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
@@ -19,9 +102,10 @@ export function SubscriptionPanel() {
     onSuccess: () => {
       toast({
         title: "Subscription cancelled",
-        description: "Your subscription has been cancelled successfully.",
+        description: "Your subscription has been successfully cancelled.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setIsDialogOpen(false);
     },
     onError: (error: Error) => {
       toast({
@@ -31,214 +115,135 @@ export function SubscriptionPanel() {
       });
     },
   });
-
-  const deleteAccountMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/account/delete");
-    },
-    onSuccess: () => {
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully.",
-      });
-      // Redirect to home after account deletion
-      navigate("/");
-      // Force refresh to ensure user is logged out
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: `Failed to delete account: ${error.message}`,
-        variant: "destructive",
-      });
-    },
-  });
   
-  if (!user) return null;
-  
-  // Free Plan UI
-  if (!user.subscriptionPlan || user.subscriptionPlan === "free") {
-    return (
-      <Card className="w-full shadow-md border-border/40">
-        <CardHeader>
-          <CardTitle>Upgrade Your Experience</CardTitle>
-          <CardDescription>Get access to premium features</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="font-semibold">Standard Plan</h3>
-            <p className="text-sm text-muted-foreground">£7/month</p>
-            <ul className="text-sm space-y-1">
-              <li>✓ 3 AI prompts per day</li>
-              <li>✓ AI-enhanced comments</li>
-              <li>✓ Priority support</li>
-            </ul>
-            <Button 
-              className="w-full mt-2" 
-              onClick={() => navigate("/payment?plan=standard")}
-            >
-              Upgrade to Standard
-            </Button>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-semibold">Founder Plan</h3>
-            <p className="text-sm text-muted-foreground">£15/month</p>
-            <ul className="text-sm space-y-1">
-              <li>✓ 10 AI prompts per day</li>
-              <li>✓ Unlimited AI-enhanced comments</li>
-              <li>✓ Process flow generation</li>
-              <li>✓ Priority support</li>
-              <li>✓ Early access to new features</li>
-            </ul>
-            <Button 
-              className="w-full mt-2" 
-              variant="default"
-              onClick={() => navigate("/payment?plan=founder")}
-            >
-              Upgrade to Founder
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter className="pt-4 border-t border-border/40 flex flex-col items-start">
-          <Button
-            variant="outline"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-2"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                deleteAccountMutation.mutate();
-              }
-            }}
-          >
-            Delete Account
-          </Button>
-        </CardFooter>
-      </Card>
-    );
+  if (!user) {
+    return null;
   }
   
-  // Standard Plan UI
-  if (user.subscriptionPlan === "standard") {
-    return (
-      <Card className="w-full shadow-md border-border/40">
-        <CardHeader>
-          <CardTitle>Standard Plan</CardTitle>
-          <CardDescription>Your current subscription</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">£7/month</p>
-            <ul className="text-sm space-y-1 mt-2">
-              <li>✓ 3 AI prompts per day</li>
-              <li>✓ AI-enhanced comments</li>
-              <li>✓ Priority support</li>
-            </ul>
-          </div>
-          
-          <div className="space-y-2 pt-4 border-t border-border/40 mt-4">
-            <h3 className="font-semibold">Upgrade to Founder Plan</h3>
-            <p className="text-sm text-muted-foreground">£15/month</p>
-            <ul className="text-sm space-y-1">
-              <li>✓ 10 AI prompts per day</li>
-              <li>✓ Unlimited AI-enhanced comments</li>
-              <li>✓ Process flow generation</li>
-              <li>✓ Priority support</li>
-              <li>✓ Early access to new features</li>
-            </ul>
-            <Button 
-              className="w-full mt-2" 
-              onClick={() => navigate("/payment?plan=founder")}
-            >
-              Upgrade to Founder
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter className="pt-4 border-t border-border/40 flex flex-col items-start space-y-2 w-full">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to cancel your subscription? You will be downgraded to the Free Plan.")) {
-                cancelSubscriptionMutation.mutate();
-              }
-            }}
-          >
-            Cancel Subscription (Downgrade to Free)
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                deleteAccountMutation.mutate();
-              }
-            }}
-          >
-            Delete Account
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+  const isPremium = user.subscriptionPlan === "standard" || user.subscriptionPlan === "founder";
+  const planType = user.subscriptionPlan || "free";
   
-  // Founder Plan UI
+  // Calculate remaining prompts percentage
+  const maxPrompts = planType === "founder" ? 10 : planType === "standard" ? 3 : 0;
+  const remainingPrompts = user.remainingPrompts || 0;
+  const promptsPercentage = maxPrompts > 0 ? (remainingPrompts / maxPrompts) * 100 : 0;
+  
   return (
-    <Card className="w-full shadow-md border-border/40">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Founder Plan</CardTitle>
-        <CardDescription>Your current subscription</CardDescription>
+        <CardTitle className="flex items-center justify-between">
+          <span>Your Subscription</span>
+          {planType === "free" ? (
+            <Badge variant="outline" className="font-normal">
+              Free Plan
+            </Badge>
+          ) : planType === "standard" ? (
+            <Badge className="bg-blue-600 hover:bg-blue-700 font-normal">
+              Standard Plan
+            </Badge>
+          ) : (
+            <Badge className="bg-purple-600 hover:bg-purple-700 font-normal">
+              Founder Plan
+            </Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          {planType === "free" 
+            ? "Upgrade to access premium features" 
+            : `You are on the ${planType === "standard" ? "Standard" : "Founder"} plan`}
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">£15/month</p>
-        <ul className="text-sm space-y-1 mt-2">
-          <li>✓ 10 AI prompts per day</li>
-          <li>✓ Unlimited AI-enhanced comments</li>
-          <li>✓ Process flow generation</li>
-          <li>✓ Priority support</li>
-          <li>✓ Early access to new features</li>
-        </ul>
+      <CardContent className="space-y-4">
+        {isPremium && maxPrompts > 0 && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Daily Prompts Remaining</span>
+              <span className="font-medium">{remainingPrompts}/{maxPrompts}</span>
+            </div>
+            <Progress value={promptsPercentage} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              Resets daily at midnight UTC
+            </p>
+          </div>
+        )}
+        
+        <div className="rounded-md border p-4">
+          <div className="space-y-3">
+            <h4 className="font-medium leading-none">Plan Features:</h4>
+            <div className="space-y-1">
+              {features.map((feature, index) => {
+                const isActive = 
+                  (planType === "free" && feature.free) ||
+                  (planType === "standard" && feature.standard) ||
+                  (planType === "founder" && feature.founder);
+                  
+                return (
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-2 ${isActive ? "" : "text-muted-foreground"}${index !== 0 ? " mt-2" : ""}`}
+                  >
+                    {isActive ? feature.icon : <X className="h-4 w-4" />}
+                    <span className="text-sm">{feature.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </CardContent>
-      <CardFooter className="pt-4 border-t border-border/40 flex flex-col items-start space-y-2 w-full">
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => {
-            if (window.confirm("Are you sure you want to downgrade to the Standard Plan?")) {
-              // Downgrade to Standard Plan
-              navigate("/payment?plan=standard&downgrade=true");
-            }
-          }}
-        >
-          Downgrade to Standard Plan
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => {
-            if (window.confirm("Are you sure you want to cancel your subscription? You will be downgraded to the Free Plan.")) {
-              cancelSubscriptionMutation.mutate();
-            }
-          }}
-        >
-          Cancel Subscription (Downgrade to Free)
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
-          onClick={() => {
-            if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-              deleteAccountMutation.mutate();
-            }
-          }}
-        >
-          Delete Account
-        </Button>
+      <CardFooter className="flex flex-col gap-2">
+        {planType === "free" ? (
+          <Button className="w-full" asChild>
+            <Link href="/payment">
+              <CreditCard className="mr-2 h-4 w-4" />
+              Upgrade Now
+            </Link>
+          </Button>
+        ) : (
+          <>
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  Cancel Subscription
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel your subscription?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will lose access to premium features immediately. Your subscription will not renew.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.preventDefault();
+                      cancelSubscriptionMutation.mutate();
+                    }}
+                    disabled={cancelSubscriptionMutation.isPending}
+                  >
+                    {cancelSubscriptionMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Cancelling...
+                      </>
+                    ) : "Yes, Cancel"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            
+            {planType === "standard" && (
+              <Button className="w-full" asChild>
+                <Link href="/payment?upgrade=founder">
+                  <Award className="mr-2 h-4 w-4" />
+                  Upgrade to Founder
+                </Link>
+              </Button>
+            )}
+          </>
+        )}
       </CardFooter>
     </Card>
   );
