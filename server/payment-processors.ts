@@ -205,6 +205,14 @@ export async function handleStripeWebhook(req: Request, res: Response) {
             await storage.updateUserPaymentStatus(user.id, "completed");
             await storage.updateUserPremiumStatus(user.id, true);
             await storage.updateUserActiveStatus(user.id, true);
+            
+            // Send payment confirmation email
+            try {
+              const { sendPaymentConfirmationEmail } = await import('./email');
+              await sendPaymentConfirmationEmail(user);
+            } catch (emailError) {
+              console.error('Failed to send payment confirmation email:', emailError);
+            }
           }
         }
         break;
@@ -256,6 +264,33 @@ export async function handleStripeWebhook(req: Request, res: Response) {
           if (user) {
             // Remove premium status but keep account active
             await storage.updateUserPremiumStatus(user.id, false);
+          }
+        }
+        break;
+        
+      case 'invoice.payment_failed':
+        const failedInvoice = event.data.object as Stripe.Invoice;
+        console.log('Invoice payment failed:', failedInvoice.id);
+        
+        if (failedInvoice.customer) {
+          const customer = typeof failedInvoice.customer === 'string' 
+            ? failedInvoice.customer 
+            : failedInvoice.customer.id;
+          
+          // Find the user with this customer ID
+          const user = await storage.getUserByStripeCustomerId(customer);
+          
+          if (user) {
+            // Update payment status to failed
+            await storage.updateUserPaymentStatus(user.id, "failed");
+            
+            // Send payment failed email
+            try {
+              const { sendPaymentFailedEmail } = await import('./email');
+              await sendPaymentFailedEmail(user);
+            } catch (emailError) {
+              console.error('Failed to send payment failed email:', emailError);
+            }
           }
         }
         break;
