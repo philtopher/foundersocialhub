@@ -28,17 +28,17 @@ const PostgresSessionStore = connectPg(session);
 export interface IStorage {
   // User methods
   createUser(userData: InsertUser): Promise<User>;
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   upsertUser(userData: InsertUser): Promise<User>;
-  updateUserPaymentStatus(userId: string, status: string): Promise<User>;
-  updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
-  updateUserActiveStatus(userId: string, isActive: boolean): Promise<User>;
-  updateUserSubscriptionPlan(userId: string, planType: 'standard' | 'founder'): Promise<User>;
-  updateUserStripeInfo(userId: string, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
-  updateUserPaypalInfo(userId: string, subscriptionId: string): Promise<User>;
+  updateUserPaymentStatus(userId: number, status: string): Promise<User>;
+  updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User>;
+  updateUserActiveStatus(userId: number, isActive: boolean): Promise<User>;
+  updateUserSubscriptionPlan(userId: number, planType: 'standard' | 'founder'): Promise<User>;
+  updateUserStripeInfo(userId: number, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
+  updateUserPaypalInfo(userId: number, subscriptionId: string): Promise<User>;
   
   // Community methods
   createCommunity(communityData: InsertCommunity): Promise<Community>;

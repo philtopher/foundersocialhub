@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sort = (req.query.sort as string) || "hot";
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const userId = req.user?.id;
+      const userId = req.user?.id ? Number(req.user.id) : undefined;
       
       let posts;
       if (userId && req.query.feed === "subscribed") {
@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if user is a member of the community
-      const membership = await storage.getCommunityMembership(req.user!.id, communityId);
+      const membership = await storage.getCommunityMembership(Number(req.user!.id), communityId);
       if (!membership && community.visibility !== "public") {
         return res.status(403).json({ message: "You must be a member to post in this community" });
       }
@@ -235,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertPostSchema.parse({
         ...req.body,
-        authorId: req.user!.id,
+        authorId: Number(req.user!.id),
         communityId,
         slug: `${slug}-${Date.now()}`
       });
@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/posts/:postId/vote", isAuthenticated, async (req, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const userId = req.user!.id;
+      const userId = Number(req.user!.id);
       const voteType = req.body.voteType as "upvote" | "downvote";
       
       if (voteType !== "upvote" && voteType !== "downvote") {
@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       
-      const posts = await storage.getUserPosts(user.id, page, limit);
+      const posts = await storage.getUserPosts(Number(user.id), page, limit);
       res.json(posts);
     } catch (error) {
       console.error("Error fetching user posts:", error);
@@ -489,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       
-      const comments = await storage.getUserComments(user.id, page, limit);
+      const comments = await storage.getUserComments(Number(user.id), page, limit);
       res.json(comments);
     } catch (error) {
       console.error("Error fetching user comments:", error);
