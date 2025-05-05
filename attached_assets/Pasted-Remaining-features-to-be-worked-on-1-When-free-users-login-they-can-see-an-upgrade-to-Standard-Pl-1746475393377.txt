@@ -1,0 +1,20 @@
+Remaining features to be worked on:
+
+1. When free users login they can see an upgrade to Standard Plan and Founder Plan on the right side of the page, tucked away to the right but below existing content on the right side bar. 
+
+2. When Standard plan users login they will see the upgrade to Founder plan only on the right side but below existing content found there. They can also see option to delete subscription and downgrade to free plan OR delete their account entirely. If they downgrade to free plan the part of the database that identifies them based on their Standard plan will be updated and they will now become Free plan users and can’t have access to any of the Premium Plan features.
+
+3. When Founder Plan users login they any upgrade link. They will see option to delete subscription and downgrade to Standard Plan or free plan OR delete their account entirely. If they downgrade to Standard plan the part of the database that identifies them based on their Standard plan will be updated and they will now become Standard plan users and can’t have access to any of the Founder Plan features.
+
+If they downgrade to free plan the part of the database that identifies them based on their Founder Plan plan will be updated and they will now become Free plan users and can’t have access to any of the Premium Plan features.
+
+4. Create profile settings where users can upload pictures, change names and display names etc (use best practices, I don’t know all the features). Note: This is based on the type of Plan the user has
+
+5. Create Account where users can change and update their username, email, password, phone etc (use best practices, I don’t know all the features). Note: This is based on the type of plan the user has
+
+6. Remember that Free Plan users can’t use AI whatsoever. They can’t even enable it in their Account Settings. 
+
+7. Free plan users Can’t communicate using AI for a user who has access to AI, unless the commenter clicks the button beside the comment form which sends an alert at the backend to the Free user to upgrade. 
+
+8. Note: If the post was made by a premium user, the invite form to subscribe won’t appear because they are already premium users.
+

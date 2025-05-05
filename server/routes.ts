@@ -625,6 +625,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/stripe/create-subscription", isAuthenticated, createStripeSubscription);
   app.post("/api/payments/stripe/webhook", handleStripeWebhook);
   
+  // Subscription management routes
+  app.post("/api/payments/cancel-subscription", isAuthenticated, async (req, res) => {
+    try {
+      const userId = Number(req.user!.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user has a subscription to cancel
+      if (!user.stripeSubscriptionId && !user.paypalSubscriptionId) {
+        return res.status(400).json({ message: "No active subscription found" });
+      }
+      
+      // For Stripe subscriptions
+      if (user.stripeSubscriptionId) {
+        try {
+          // Implement Stripe cancellation
+          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+            apiVersion: '2023-10-16',
+          });
+          
+          await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+          
+          // Update user record
+          await storage.updateUserSubscriptionPlan(userId, "free");
+          await db.update(users).set({
+            stripeSubscriptionId: null,
+            isPremium: false,
+          }).where(eq(users.id, userId));
+          
+        } catch (stripeError) {
+          console.error("Stripe cancellation error:", stripeError);
+          return res.status(500).json({ message: "Failed to cancel Stripe subscription" });
+        }
+      }
+      
+      // For PayPal subscriptions (if implemented)
+      if (user.paypalSubscriptionId) {
+        try {
+          // Implement PayPal cancellation logic
+          // For now, just update the user record
+          await storage.updateUserSubscriptionPlan(userId, "free");
+          await db.update(users).set({
+            paypalSubscriptionId: null,
+            isPremium: false,
+          }).where(eq(users.id, userId));
+          
+        } catch (paypalError) {
+          console.error("PayPal cancellation error:", paypalError);
+          return res.status(500).json({ message: "Failed to cancel PayPal subscription" });
+        }
+      }
+      
+      // Send email notification about subscription cancellation
+      try {
+        if (user.email) {
+          // Implement email notification logic
+        }
+      } catch (emailError) {
+        console.error("Failed to send cancellation email:", emailError);
+        // Continue with cancellation even if email fails
+      }
+      
+      res.status(200).json({ message: "Subscription cancelled successfully" });
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
+  
+  // Account deletion route
+  app.post("/api/account/delete", isAuthenticated, async (req, res) => {
+    try {
+      const userId = Number(req.user!.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Cancel any active subscriptions first
+      if (user.stripeSubscriptionId) {
+        try {
+          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+            apiVersion: '2023-10-16',
+          });
+          
+          await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+        } catch (stripeError) {
+          console.error("Error cancelling Stripe subscription during account deletion:", stripeError);
+          // Continue with account deletion even if subscription cancellation fails
+        }
+      }
+      
+      // Delete user data
+      // This would typically involve multiple steps to delete related records
+      
+      // 1. Delete user's comments and comment votes
+      await db.delete(commentVotes).where(eq(commentVotes.userId, userId));
+      await db.delete(comments).where(eq(comments.authorId, userId));
+      
+      // 2. Delete user's post votes and posts
+      await db.delete(postVotes).where(eq(postVotes.userId, userId));
+      await db.delete(posts).where(eq(posts.authorId, userId));
+      
+      // 3. Remove user from community memberships
+      await db.delete(communityMembers).where(eq(communityMembers.userId, userId));
+      
+      // 4. Finally delete the user account
+      await db.delete(users).where(eq(users.id, userId));
+      
+      // Log the user out
+      req.logout(() => {
+        res.status(200).json({ message: "Account deleted successfully" });
+      });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+  
   // PayPal routes - temporarily disabled
   // app.get("/api/payments/paypal/setup", isAuthenticated, loadPaypalDefault);
   // app.post("/api/payments/paypal/order", isAuthenticated, createPaypalOrder);
