@@ -48,7 +48,7 @@ export function ProjectAccessPanel() {
   const isPremium = user.subscriptionPlan === "standard" || user.subscriptionPlan === "founder";
   
   return (
-    <Card className="w-full">
+    <Card className="w-full" id="taskflow">
       <CardHeader>
         <CardTitle>TaskFlowPro Access</CardTitle>
         <CardDescription>

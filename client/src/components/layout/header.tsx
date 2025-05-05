@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut, HelpCircle } from "lucide-react";
+import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut, HelpCircle, ExternalLink } from "lucide-react";
+import { TaskFlowNavItem } from "@/components/navigation/taskflow-nav-item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,6 +113,7 @@ export function Header() {
                       <Plus size={20} />
                     </Button>
                   </Link>
+                  <TaskFlowNavItem />
                 </div>
                 
                 <DropdownMenu>
