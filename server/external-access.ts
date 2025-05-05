@@ -4,12 +4,17 @@ import { storage } from './storage';
 import crypto from 'crypto';
 import { z } from 'zod';
 
-// This would be stored securely in environment variables
+// Check for required environment variables
 if (!process.env.JWT_SECRET) {
   console.warn('JWT_SECRET environment variable not set. Using insecure default for development.');
 }
 
+if (!process.env.WEBHOOK_SECRET) {
+  console.warn('WEBHOOK_SECRET environment variable not set. Using insecure default for development.');
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'development_secret_do_not_use_in_production';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'webhook_development_secret_do_not_use_in_production';
 const JWT_EXPIRY = '1h'; // Token expires after 1 hour
 
 // Define the schema for validating webhook subscription requests
@@ -137,6 +142,12 @@ export async function verifyAccessToken(req: Request, res: Response) {
  */
 export async function registerWebhook(req: Request, res: Response) {
   try {
+    // Check for API key or authentication (using WEBHOOK_SECRET)
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
+      return res.status(401).json({ message: 'Unauthorized - Invalid webhook authentication' });
+    }
+    
     // Validate the request
     const validatedData = webhookSubscriptionSchema.parse(req.body);
     
@@ -184,9 +195,10 @@ export async function notifySubscriptionChange(userId: number, event: 'subscript
           timestamp: new Date().toISOString(),
         };
         
-        // Create a signature for the webhook
+        // Create a signature for the webhook using our WEBHOOK_SECRET
+        // This provides a more secure method for the external application to verify the request
         const signature = crypto
-          .createHmac('sha256', webhook.secret)
+          .createHmac('sha256', WEBHOOK_SECRET)
           .update(JSON.stringify(payload))
           .digest('hex');
         
