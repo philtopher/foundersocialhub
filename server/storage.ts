@@ -28,9 +28,10 @@ const PostgresSessionStore = connectPg(session);
 export interface IStorage {
   // User methods
   createUser(userData: InsertUser): Promise<User>;
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  upsertUser(userData: UpsertUser): Promise<User>;
   
   // Community methods
   createCommunity(communityData: InsertCommunity): Promise<Community>;
@@ -102,10 +103,25 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     return await db.query.users.findFirst({
       where: eq(users.id, id)
     });
+  }
+  
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
   
   async getUserByUsername(username: string): Promise<User | undefined> {

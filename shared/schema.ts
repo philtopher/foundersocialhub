@@ -3,15 +3,25 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: text("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  }
+);
+
 // Users
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey().notNull(), // Using string ID from Replit Auth
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  email: text("email").notNull().unique(),
-  displayName: text("display_name"),
-  avatarUrl: text("avatar_url"),
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
   bio: text("bio"),
+  profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   isPremium: boolean("is_premium").default(false),
@@ -19,11 +29,10 @@ export const users = pgTable("users", {
 
 export const insertUserSchema = createInsertSchema(users, {
   username: (schema) => schema.min(3, "Username must be at least 3 characters"),
-  email: (schema) => schema.email("Must provide a valid email"),
-  password: (schema) => schema.min(6, "Password must be at least 6 characters"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 // Communities
@@ -42,7 +51,7 @@ export const communities = pgTable("communities", {
   bannerUrl: text("banner_url"),
   visibility: communityVisibilityEnum("visibility").default("public").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  creatorId: integer("creator_id").references(() => users.id).notNull(),
+  creatorId: text("creator_id").references(() => users.id).notNull(),
   memberCount: integer("member_count").default(1).notNull(),
 });
 
@@ -64,7 +73,7 @@ export const communityRoleEnum = pgEnum("community_role", [
 
 export const communityMembers = pgTable("community_members", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   communityId: integer("community_id").references(() => communities.id).notNull(),
   role: communityRoleEnum("role").default("member").notNull(),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
@@ -76,7 +85,7 @@ export const posts = pgTable("posts", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
-  authorId: integer("author_id").references(() => users.id).notNull(),
+  authorId: text("author_id").references(() => users.id).notNull(),
   communityId: integer("community_id").references(() => communities.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -104,7 +113,7 @@ export const commentStatusEnum = pgEnum("comment_status", [
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  authorId: integer("author_id").references(() => users.id).notNull(),
+  authorId: text("author_id").references(() => users.id).notNull(),
   postId: integer("post_id").references(() => posts.id).notNull(),
   parentId: integer("parent_id").references(() => comments.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -128,7 +137,7 @@ export const voteTypeEnum = pgEnum("vote_type", ["upvote", "downvote"]);
 
 export const postVotes = pgTable("post_votes", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   postId: integer("post_id").references(() => posts.id).notNull(),
   voteType: voteTypeEnum("vote_type").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -136,7 +145,7 @@ export const postVotes = pgTable("post_votes", {
 
 export const commentVotes = pgTable("comment_votes", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   commentId: integer("comment_id").references(() => comments.id).notNull(),
   voteType: voteTypeEnum("vote_type").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
