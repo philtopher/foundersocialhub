@@ -244,8 +244,8 @@ export async function generateAccessLink(req: Request, res: Response) {
       { expiresIn: '15m' } // Token expires in 15 minutes
     );
     
-    // In production, you would use the actual URL of your external application
-    const externalAppUrl = process.env.PROJECT_MANAGEMENT_APP_URL || 'https://project-management-app.example.com';
+    // Using TaskFlowPro as the external project management application
+    const externalAppUrl = process.env.PROJECT_MANAGEMENT_APP_URL || 'https://taskflowpro.replit.app';
     const accessLink = `${externalAppUrl}/sso?token=${token}`;
     
     return res.status(200).json({

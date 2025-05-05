@@ -50,19 +50,19 @@ export function ProjectAccessPanel() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Project Management Access</CardTitle>
+        <CardTitle>TaskFlowPro Access</CardTitle>
         <CardDescription>
           {isPremium 
-            ? "Access the integrated project management platform" 
-            : "Upgrade to a premium plan to access the project management platform"}
+            ? "Access TaskFlowPro project management platform for free" 
+            : "Upgrade to a premium plan to access TaskFlowPro for free"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isPremium ? (
           <div className="space-y-4">
             <p className="text-sm">
-              As a premium user, you have free access to our integrated project management tools. Generate a secure 
-              access link to log in without needing additional credentials.
+              As a premium user, you have free access to TaskFlowPro project management platform. Generate a secure 
+              access link to log in to TaskFlowPro without needing additional credentials.
             </p>
             {accessLink && (
               <div className="rounded-md bg-muted p-4">
@@ -92,7 +92,7 @@ export function ProjectAccessPanel() {
         ) : (
           <div className="space-y-4">
             <p className="text-sm">
-              Premium subscribers (Standard and Founder plans) get free access to our integrated project 
+              Premium subscribers (Standard and Founder plans) get free access to TaskFlowPro project 
               management platform with features like:
             </p>
             <ul className="list-disc pl-5 text-sm space-y-1">
@@ -125,14 +125,14 @@ export function ProjectAccessPanel() {
             ) : (
               <>
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Access Project Platform
+                Access TaskFlowPro
               </>
             )}
           </Button>
         ) : (
           <Button className="w-full" asChild>
             <a href="/payment">
-              Upgrade to access
+              Upgrade for Free TaskFlowPro Access
             </a>
           </Button>
         )}
