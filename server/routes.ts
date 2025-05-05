@@ -10,7 +10,7 @@ import {
   commentStatusEnum,
   voteTypeEnum
 } from "@shared/schema";
-import { moderateComment, processCommentResponse } from "./openai";
+import { moderateComment, processCommentResponse, enhanceComment, generateProcessFlows } from "./openai";
 import { z } from "zod";
 import { eq, and, desc, asc, sql, isNull, or } from "drizzle-orm";
 import slugify from "slugify";
