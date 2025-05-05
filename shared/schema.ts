@@ -39,6 +39,8 @@ export const users = pgTable("users", {
   directCommentsEnabled: boolean("direct_comments_enabled").default(false), // Skip AI workflow if true
   remainingPrompts: integer("remaining_prompts").default(3), // For non-founder users
   password: text("password"), // Existing password field in db
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
 });
 
 

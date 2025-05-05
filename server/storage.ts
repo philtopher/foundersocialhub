@@ -32,6 +32,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
   upsertUser(userData: InsertUser): Promise<User>;
   updateUserPaymentStatus(userId: number, status: string): Promise<User>;
   updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User>;
@@ -39,6 +40,8 @@ export interface IStorage {
   updateUserSubscriptionPlan(userId: number, planType: 'standard' | 'founder'): Promise<User>;
   updateUserStripeInfo(userId: number, customerData: { customerId: string, subscriptionId?: string }): Promise<User>;
   updateUserPaypalInfo(userId: number, subscriptionId: string): Promise<User>;
+  createPasswordResetToken(email: string): Promise<string | null>;
+  resetPassword(token: string, newPassword: string): Promise<boolean>;
   
   // Community methods
   createCommunity(communityData: InsertCommunity): Promise<Community>;
@@ -147,6 +150,64 @@ export class DatabaseStorage implements IStorage {
     return await db.query.users.findFirst({
       where: eq(users.stripeCustomerId, customerId)
     });
+  }
+  
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    return await db.query.users.findFirst({
+      where: and(
+        eq(users.resetToken, token),
+        gt(users.resetTokenExpiry!, new Date()) // Token must not be expired
+      )
+    });
+  }
+  
+  async createPasswordResetToken(email: string): Promise<string | null> {
+    const user = await this.getUserByEmail(email);
+    
+    if (!user) {
+      return null;
+    }
+    
+    // Generate a random token
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Set token expiry to 1 hour from now
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 1);
+    
+    // Update user with token and expiry
+    await db.update(users)
+      .set({
+        resetToken: token,
+        resetTokenExpiry: expiryDate,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, user.id));
+    
+    return token;
+  }
+  
+  async resetPassword(token: string, newPassword: string): Promise<boolean> {
+    const user = await this.getUserByResetToken(token);
+    
+    if (!user) {
+      return false;
+    }
+    
+    // Hash the new password
+    const hashedPassword = await hashPassword(newPassword);
+    
+    // Update user password and clear reset token
+    await db.update(users)
+      .set({
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, user.id));
+    
+    return true;
   }
   
   async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User> {
