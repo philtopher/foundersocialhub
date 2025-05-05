@@ -93,7 +93,7 @@ export default function CreatePostPage() {
         description: "Your post has been published successfully.",
       });
       
-      navigate(`/r/${community?.name}/post/${post.id}`);
+      navigate(`/${community?.name}/post/${post.id}`);
     },
     onError: (error) => {
       toast({
@@ -147,10 +147,10 @@ export default function CreatePostPage() {
               <Button
                 variant="ghost"
                 className="flex items-center text-neutral hover:text-dark"
-                onClick={() => navigate(communityName ? `/r/${communityName}` : "/")}
+                onClick={() => navigate(communityName ? `/${communityName}` : "/")}
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                {communityName ? `Back to r/${communityName}` : "Back to Home"}
+                {communityName ? `Back to ${communityName}` : "Back to Home"}
               </Button>
               <h1 className="text-xl font-bold ml-4">Create a Post</h1>
             </div>
@@ -177,7 +177,7 @@ export default function CreatePostPage() {
                           <SelectContent>
                             {communities?.map((community) => (
                               <SelectItem key={community.id} value={community.id.toString()}>
-                                r/{community.name}
+                                {community.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -280,7 +280,7 @@ export default function CreatePostPage() {
                       type="button"
                       variant="outline"
                       className="mr-2"
-                      onClick={() => navigate(communityName ? `/r/${communityName}` : "/")}
+                      onClick={() => navigate(communityName ? `/${communityName}` : "/")}
                     >
                       Cancel
                     </Button>

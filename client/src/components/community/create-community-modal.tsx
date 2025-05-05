@@ -113,16 +113,13 @@ export function CreateCommunityModal({ isOpen, onClose }: CreateCommunityModalPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Community Name</FormLabel>
-                  <div className="flex items-center">
-                    <span className="text-neutral mr-1">r/</span>
-                    <FormControl>
-                      <Input
-                        placeholder="community_name"
-                        {...field}
-                        className="flex-1 p-2 border border-light-border rounded"
-                      />
-                    </FormControl>
-                  </div>
+                  <FormControl>
+                    <Input
+                      placeholder="community_name"
+                      {...field}
+                      className="flex-1 p-2 border border-light-border rounded"
+                    />
+                  </FormControl>
                   <FormDescription>
                     Community names cannot be changed later.
                   </FormDescription>

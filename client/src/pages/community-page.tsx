@@ -251,7 +251,7 @@ export default function CommunityPage() {
                   Be the first to create a post in this community!
                 </p>
                 <Button
-                  onClick={() => navigate(`/r/${communityName}/submit`)}
+                  onClick={() => navigate(`/${communityName}/submit`)}
                   className="bg-primary hover:bg-primary-hover text-white"
                 >
                   Create Post
