@@ -1,0 +1,150 @@
+terraform {
+  required_version = ">= 1.4"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  # Example backend; adjust for your setup
+  backend "s3" {
+    bucket = "tochi-demo"
+    key    = "demo-app/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
+#######################
+# VARIABLES & LOCALS  #
+#######################
+
+variable "aws_region" {
+  type    = string
+  default = "eu-west-2"
+}
+
+variable "key_name" {
+  type        = string
+  description = "Name of an existing EC2 KeyPair for SSH access"
+  default     = "demo-key"
+}
+
+variable "ssh_cidr" {
+  type        = string
+  description = "CIDR block allowed to SSH (e.g. your office IP/32)"
+  default     = "0.0.0.0/0" # Allow SSH from anywhere for troubleshooting (not recommended for production)
+}
+
+variable "instance_type" {
+  type    = string
+  default = "t3.micro"
+}
+
+variable "app_repo" {
+  type    = string
+  default = "https://github.com/philtopher/foundersocialhub.git"
+}
+
+locals {
+  owner_tag = "tufort-dev@yahoo.com"
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+########################
+# DATA SOURCES         #
+########################
+
+# Use latest Amazon Linux 2023 AMI for EC2 Instance Connect compatibility
+data "aws_ssm_parameter" "al2023" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
+}
+
+# Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+########################
+# SECURITY GROUP       #
+########################
+
+resource "aws_security_group" "app_sg" {
+  name        = "demo-app-sg"
+  description = "Allow HTTP + SSH from trusted CIDR"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    description = "SSH from anywhere (for troubleshooting)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.ssh_cidr]
+  }
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "demo-app-sg"
+    Owner   = local.owner_tag
+    Env     = "dev"
+  }
+}
+
+########################
+# EC2 INSTANCE         #
+########################
+
+resource "aws_instance" "app" {
+  ami                    = data.aws_ssm_parameter.al2023.value
+  instance_type          = var.instance_type
+  key_name               = var.key_name
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+
+  # EBS-optimized root volume
+  ebs_optimized = true
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    iops        = 3000
+    throughput  = 125
+  }
+
+  # Cloud-init / user_data
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo dnf update -y
+              # Install git in a separate step and ensure it's available before cloning
+              until sudo dnf install -y git; do sleep 2; done
+              git --version
+              git clone https://github.com/philtopher/foundersocialhub.git /home/ec2-user/app
+              # Install Node.js 18 from NodeSource (correct for Amazon Linux 2023)
+              curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+              sudo dnf install -y nodejs
+              sudo chown -R ec2-user:ec2-user /home/ec2-user/app
+              su - ec2-user -c "cd ~/app && npm install"
+              su - ec2-user -c "nohup node ~/app/app.js > /var/log/demo-app.log 2>&1 &"
+              EOF
+
+  tags = {
+    Name  = "demo-node-app"
+    Owner = local.owner_tag
+    Env   = "dev"
+  }
+}
