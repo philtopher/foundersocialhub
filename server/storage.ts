@@ -769,51 +769,16 @@ export class DatabaseStorage implements IStorage {
         break;
     }
     
-    // Get top-level comments (no parent)
-    const topLevelCommentsQuery = await db.query.comments.findMany({
-      where: and(
-        eq(comments.postId, postId),
-        isNull(comments.parentId)
-      ),
+    // Get all comments for the post
+    const allComments = await db.query.comments.findMany({
+      where: eq(comments.postId, postId),
       orderBy,
       with: {
-        replies: {
-          orderBy: desc(comments.upvotes)
-        }
+        author: true,
       }
     });
     
-    // Process top level comments and their replies
-    const topLevelComments = await Promise.all(
-      topLevelCommentsQuery.map(async (comment) => {
-        // Get the author of the comment
-        const author = await db.query.users.findFirst({
-          where: eq(users.id, comment.authorId)
-        });
-        
-        // Process each reply to add its author
-        const replies = await Promise.all(
-          (comment.replies || []).map(async (reply) => {
-            const replyAuthor = await db.query.users.findFirst({
-              where: eq(users.id, reply.authorId)
-            });
-            
-            return {
-              ...reply,
-              author: replyAuthor
-            };
-          })
-        );
-        
-        return {
-          ...comment,
-          author,
-          replies
-        };
-      })
-    );
-    
-    return topLevelComments;
+    return allComments;
   }
   
   async getUserComments(userId: number, page: number, limit: number): Promise<Comment[]> {
