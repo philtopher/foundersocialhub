@@ -25,18 +25,18 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
-      <Route path="/:communityName" component={CommunityPage} />
-      <Route path="/:communityName/post/:postId" component={PostDetailPage} />
-      <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
-      <Route path="/u/:username" component={UserProfilePage} />
+      <Route path="/how-it-works" component={HowItWorksPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
       <ProtectedRoute path="/payment" component={PaymentPage} />
       <ProtectedRoute path="/payment-success" component={PaymentSuccessPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/my-communities" component={MyCommunitiesPage} />
-      <Route path="/how-it-works" component={HowItWorksPage} />
-      <Route path="/terms" component={TermsPage} />
-      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/u/:username" component={UserProfilePage} />
+      <Route path="/:communityName" component={CommunityPage} />
+      <Route path="/:communityName/post/:postId" component={PostDetailPage} />
+      <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
       <Route component={NotFound} />
     </Switch>
   );
