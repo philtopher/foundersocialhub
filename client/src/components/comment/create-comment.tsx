@@ -55,11 +55,6 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
       queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}`] });
       if (onSuccess) onSuccess();
-      
-      toast({
-        title: "Comment submitted",
-        description: "Your comment is being processed and will appear shortly.",
-      });
     },
     onError: (error) => {
       toast({

@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, Reply, MoreHorizontal, AlertTriangle, Loader2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Reply, MoreHorizontal, AlertTriangle, Loader2, Sparkles, Zap } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -110,6 +110,27 @@ export function CommentItem({ comment, onReplyClick, isReplying, currentUser }: 
       });
     }
   };
+
+  const handleAIEnhancement = async () => {
+    try {
+      const response = await apiRequest("POST", `/api/comments/${comment.id}/ai-enhance`);
+      const enhanced = await response.json();
+      
+      // Refresh comments to show AI enhancements
+      queryClient.invalidateQueries({ queryKey: [`/api/posts/${comment.postId}/comments`] });
+      
+      toast({
+        title: "AI Enhancement Started",
+        description: "Your comment is being analyzed for collaboration opportunities",
+      });
+    } catch (error) {
+      toast({
+        title: "Enhancement failed",
+        description: error instanceof Error ? error.message : "AI enhancement is temporarily unavailable",
+        variant: "destructive",
+      });
+    }
+  };
   
   // Determine if comment was AI-processed
   const isAIProcessed = comment.status === "ai_processed";
@@ -179,6 +200,23 @@ export function CommentItem({ comment, onReplyClick, isReplying, currentUser }: 
               <Reply className="h-4 w-4 mr-1" />
               <span className="text-xs">Reply</span>
             </Button>
+            
+            {/* AI Enhancement for Premium Users */}
+            {currentUser && 
+             currentUser.subscriptionPlan && 
+             currentUser.subscriptionPlan !== "free" && 
+             currentUser.id === comment.authorId && 
+             !comment.processFlowsGenerated && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="px-2 py-1 text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10"
+                onClick={() => handleAIEnhancement()}
+              >
+                <Sparkles className="h-4 w-4 mr-1" />
+                <span className="text-xs">AI Enhance</span>
+              </Button>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

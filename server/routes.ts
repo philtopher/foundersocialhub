@@ -461,6 +461,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
       
+      // Get user details to check subscription
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       // Validate comment content
       const validatedData = insertCommentSchema.parse({
         content: req.body.content,
@@ -469,21 +475,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parentId
       });
       
-      // Moderate comment using OpenAI
-      const moderationResult = await moderateComment(validatedData.content, post.title);
+      // For free users: create comment immediately without AI processing
+      if (!user.subscriptionPlan || user.subscriptionPlan === "free") {
+        const comment = await storage.createComment({
+          ...validatedData,
+          status: "approved"
+        });
+        
+        // Get comment with author info for response
+        const commentWithAuthor = await storage.getComment(comment.id);
+        
+        // Increment post comment count
+        await storage.incrementPostCommentCount(postId);
+        
+        return res.status(201).json(commentWithAuthor);
+      }
       
-      // Create comment with appropriate status
-      const comment = await storage.createComment({
-        ...validatedData,
-        status: moderationResult.isApproved ? "approved" : "pending",
-        aiPrompt: moderationResult.aiPrompt,
-        aiResponse: moderationResult.isApproved ? null : moderationResult.reason
-      });
-      
-      // Increment post comment count
-      await storage.incrementPostCommentCount(postId);
-      
-      res.status(201).json(comment);
+      // For premium users: AI-enhanced commenting workflow
+      try {
+        const moderationResult = await moderateComment(validatedData.content, post.title);
+        
+        // Create comment with AI analysis
+        const comment = await storage.createComment({
+          ...validatedData,
+          status: "approved", // Always approve for immediate display
+          aiPrompt: moderationResult.aiPrompt,
+          aiResponse: moderationResult.reason,
+          enhancedContent: moderationResult.enhancedContent || null,
+          processFlowsGenerated: false
+        });
+        
+        // Get comment with author info for response
+        const commentWithAuthor = await storage.getComment(comment.id);
+        
+        // Increment post comment count
+        await storage.incrementPostCommentCount(postId);
+        
+        res.status(201).json(commentWithAuthor);
+      } catch (aiError) {
+        // If AI processing fails, fall back to basic comment creation
+        console.warn("AI processing failed, creating basic comment:", aiError);
+        
+        const comment = await storage.createComment({
+          ...validatedData,
+          status: "approved"
+        });
+        
+        const commentWithAuthor = await storage.getComment(comment.id);
+        await storage.incrementPostCommentCount(postId);
+        
+        res.status(201).json(commentWithAuthor);
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ errors: error.errors });
