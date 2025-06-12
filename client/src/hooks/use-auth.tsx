@@ -39,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Invalidate and refetch to ensure latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.username}!`,
@@ -60,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Invalidate and refetch to ensure latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Registration successful",
         description: `Welcome to FounderSocials, ${user.username}!`,
