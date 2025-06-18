@@ -548,7 +548,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatedPost = await storage.getPost(postId);
         
         // Emit real-time update to all clients
-        io.emit("commentAdded", {
+        console.log("Emitting new-comment event for premium user, post:", postId);
+        io.emit("new-comment", {
           postId: postId,
           comment: commentWithAuthor,
           commentCount: updatedPost?.commentCount || 0
@@ -571,7 +572,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatedPost = await storage.getPost(postId);
         
         // Emit real-time update to all clients
-        io.emit("commentAdded", {
+        console.log("Emitting new-comment event for fallback comment, post:", postId);
+        io.emit("new-comment", {
           postId: postId,
           comment: commentWithAuthor,
           commentCount: updatedPost?.commentCount || 0

@@ -32,22 +32,33 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!postId) return;
 
-    const handleCommentAdded = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
+    const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
+      console.log("Received new-comment event:", data);
       if (data.postId === parseInt(postId)) {
-        // Update comments query
-        queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
+        // Add new comment to existing cache immediately
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
+          if (!oldComments) return [data.comment];
+          // Check if comment already exists to avoid duplicates
+          const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
+          if (commentExists) return oldComments;
+          // Add new comment at the beginning for immediate visibility
+          return [data.comment, ...oldComments];
+        });
         
-        // Update post query to reflect new comment count
-        queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}`] });
+        // Update post comment count
+        queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
+          if (!oldPost) return oldPost;
+          return { ...oldPost, commentCount: data.commentCount };
+        });
       }
     };
 
-    socket.on("commentAdded", handleCommentAdded);
+    socket.on("new-comment", handleNewComment);
 
     return () => {
-      socket.off("commentAdded", handleCommentAdded);
+      socket.off("new-comment", handleNewComment);
     };
-  }, [postId]);
+  }, [postId, commentSort]);
 
   if (postLoading) {
     return (
