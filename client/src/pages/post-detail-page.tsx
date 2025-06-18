@@ -11,6 +11,8 @@ import { CreateComment } from "@/components/comment/create-comment";
 import { CommentItem } from "@/components/comment/comment-item";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { socket } from "@/lib/socket";
+import { queryClient } from "@/lib/queryClient";
 
 export default function PostDetailPage() {
   const { communityName, postId } = useParams();
@@ -25,6 +27,27 @@ export default function PostDetailPage() {
     queryKey: [`/api/posts/${postId}/comments`, { sort: commentSort }],
     enabled: !!postId,
   });
+
+  // Real-time Socket.IO integration for live comments
+  useEffect(() => {
+    if (!postId) return;
+
+    const handleCommentAdded = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
+      if (data.postId === parseInt(postId)) {
+        // Update comments query
+        queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
+        
+        // Update post query to reflect new comment count
+        queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}`] });
+      }
+    };
+
+    socket.on("commentAdded", handleCommentAdded);
+
+    return () => {
+      socket.off("commentAdded", handleCommentAdded);
+    };
+  }, [postId]);
 
   if (postLoading) {
     return (
