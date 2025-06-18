@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import { Server as SocketIOServer } from "socket.io";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { generateAccessToken, verifyAccessToken, registerWebhook, generateAccessLink } from "./external-access";
@@ -58,6 +59,24 @@ async function comparePasswords(supplied: string, stored: string) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes
   setupAuth(app);
+
+  // Create HTTP server and setup Socket.IO
+  const httpServer = createServer(app);
+  const io = new SocketIOServer(httpServer, {
+    cors: {
+      origin: process.env.NODE_ENV === "production" ? false : "*",
+      methods: ["GET", "POST"]
+    }
+  });
+
+  // Socket.IO connection handling
+  io.on("connection", (socket) => {
+    console.log("Client connected:", socket.id);
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected:", socket.id);
+    });
+  });
 
   // Traditional username/password authentication routes
   app.post("/api/register", async (req, res) => {
@@ -488,6 +507,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment post comment count
         await storage.incrementPostCommentCount(postId);
         
+        // Get updated post for comment count
+        const updatedPost = await storage.getPost(postId);
+        
+        // Emit real-time update to all clients
+        io.emit("commentAdded", {
+          postId: postId,
+          comment: commentWithAuthor,
+          commentCount: updatedPost?.commentCount || 0
+        });
+        
         return res.status(201).json(commentWithAuthor);
       }
       
@@ -511,6 +540,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment post comment count
         await storage.incrementPostCommentCount(postId);
         
+        // Get updated post for comment count
+        const updatedPost = await storage.getPost(postId);
+        
+        // Emit real-time update to all clients
+        io.emit("commentAdded", {
+          postId: postId,
+          comment: commentWithAuthor,
+          commentCount: updatedPost?.commentCount || 0
+        });
+        
         res.status(201).json(commentWithAuthor);
       } catch (aiError) {
         // If AI processing fails, fall back to basic comment creation
@@ -523,6 +562,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const commentWithAuthor = await storage.getComment(comment.id);
         await storage.incrementPostCommentCount(postId);
+        
+        // Get updated post for comment count
+        const updatedPost = await storage.getPost(postId);
+        
+        // Emit real-time update to all clients
+        io.emit("commentAdded", {
+          postId: postId,
+          comment: commentWithAuthor,
+          commentCount: updatedPost?.commentCount || 0
+        });
         
         res.status(201).json(commentWithAuthor);
       }
@@ -1229,9 +1278,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   });
-
-  // Create HTTP server
-  const httpServer = createServer(app);
 
   return httpServer;
 }

@@ -1,0 +1,152 @@
+I want to upgrade this project so that when a user posts a comment, it appears instantly on all connected clients without needing to refresh the page.
+I want the comment count to also update live.
+Use React on the frontend and Node.js with Socket.IO on the backend.
+Below is a sample example of both client and server code and how to wire them up. NOTE: THE CODE IS A TIP, YOU DONT NEED TO USE IT SO YOU DONT DESTROY THE EXISTING WORKFLOW
+Use database as well for any storage.
+
+// server/index.js
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require("cors");
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] },
+});
+
+app.use(cors());
+app.use(express.json());
+
+let comments = []; // In-memory for demo
+
+// REST Endpoint (for initial load)
+app.get("/api/comments", (req, res) => {
+  res.json({ comments, count: comments.length });
+});
+
+// WebSocket connection
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
+  socket.on("newComment", (comment) => {
+    comments.push(comment);
+
+    // Emit to all clients
+    io.emit("commentAdded", {
+      comment,
+      count: comments.length,
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
+
+server.listen(4000, () => {
+  console.log("Server running on http://localhost:4000");
+});
+=============
+ CLIENT SIDE – React
+1. Install packages
+
+cd client
+npm install socket.io-client axios
+
+
+2. client/src/socket.js
+
+// socket.js
+import { io } from "socket.io-client";
+export const socket = io("http://localhost:4000");
+
+
+ 3. client/src/CommentBox.js
+
+// CommentBox.js
+import { useState } from "react";
+import { socket } from "./socket";
+
+export default function CommentBox() {
+  const [comment, setComment] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (comment.trim()) {
+      socket.emit("newComment", {
+        id: Date.now(),
+        text: comment,
+      });
+      setComment("");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Write a comment..."
+      />
+      <button type="submit">Post</button>
+    </form>
+  );
+}
+💬 4. client/src/CommentList.js
+
+// CommentList.js
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { socket } from "./socket";
+
+export default function CommentList() {
+  const [comments, setComments] = useState([]);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    axios.get("http://localhost:4000/api/comments").then((res) => {
+      setComments(res.data.comments);
+      setCount(res.data.count);
+    });
+
+    socket.on("commentAdded", ({ comment, count }) => {
+      setComments((prev) => [...prev, comment]);
+      setCount(count);
+    });
+
+    return () => {
+      socket.off("commentAdded");
+    };
+  }, []);
+
+  return (
+    <div>
+      <h3>{count} Comment(s)</h3>
+      <ul>
+        {comments.map((c) => (
+          <li key={c.id}>{c.text}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+🧱 5. client/src/App.js
+
+// App.js
+import CommentBox from "./CommentBox";
+import CommentList from "./CommentList";
+
+function App() {
+  return (
+    <div style={{ padding: "1rem" }}>
+      <h2>Live Comments</h2>
+      <CommentBox />
+      <hr />
+      <CommentList />
+    </div>
+  );
+}
+
+export default App;
