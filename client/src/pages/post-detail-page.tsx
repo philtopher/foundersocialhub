@@ -34,15 +34,30 @@ export default function PostDetailPage() {
 
     const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
       console.log("Received new-comment event:", data);
+      console.log("Current postId:", postId, "Event postId:", data.postId);
       if (data.postId === parseInt(postId)) {
-        // Add new comment to existing cache immediately
+        console.log("PostId matches, updating cache...");
+        
+        // Invalidate and refetch comments to ensure they appear immediately
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/posts/${postId}/comments`],
+          exact: false 
+        });
+        
+        // Also try to update the cache directly as a fallback
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
+          console.log("Updating comments cache, old comments:", oldComments);
           if (!oldComments) return [data.comment];
           // Check if comment already exists to avoid duplicates
           const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
-          if (commentExists) return oldComments;
+          if (commentExists) {
+            console.log("Comment already exists, not adding duplicate");
+            return oldComments;
+          }
           // Add new comment at the beginning for immediate visibility
-          return [data.comment, ...oldComments];
+          const newComments = [data.comment, ...oldComments];
+          console.log("New comments array:", newComments);
+          return newComments;
         });
         
         // Update post comment count
