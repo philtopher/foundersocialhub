@@ -56,13 +56,16 @@ async function comparePasswords(supplied: string, stored: string) {
   return hashedBuf.equals(suppliedBuf);
 }
 
+// Global Socket.IO instance
+let io: SocketIOServer;
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes
   setupAuth(app);
 
   // Create HTTP server and setup Socket.IO
   const httpServer = createServer(app);
-  const io = new SocketIOServer(httpServer, {
+  io = new SocketIOServer(httpServer, {
     cors: {
       origin: process.env.NODE_ENV === "production" ? false : "*",
       methods: ["GET", "POST"]
@@ -511,7 +514,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatedPost = await storage.getPost(postId);
         
         // Emit real-time update to all clients
-        io.emit("commentAdded", {
+        console.log("Emitting new-comment event for post:", postId);
+        io.emit("new-comment", {
           postId: postId,
           comment: commentWithAuthor,
           commentCount: updatedPost?.commentCount || 0
