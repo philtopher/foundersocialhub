@@ -28,36 +28,21 @@ export default function PostDetailPage() {
     enabled: !!postId,
   });
 
-  // Real-time Socket.IO integration for live comments
+  // Real-time Socket.IO integration for live comments and votes
   useEffect(() => {
     if (!postId) return;
 
     const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
       console.log("Received new-comment event:", data);
-      console.log("Current postId:", postId, "Event postId:", data.postId);
       if (data.postId === parseInt(postId)) {
-        console.log("PostId matches, updating cache...");
-        
-        // Invalidate and refetch comments to ensure they appear immediately
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/posts/${postId}/comments`],
-          exact: false 
-        });
-        
-        // Also try to update the cache directly as a fallback
+        // Update comments cache directly for instant appearance
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
-          console.log("Updating comments cache, old comments:", oldComments);
           if (!oldComments) return [data.comment];
           // Check if comment already exists to avoid duplicates
           const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
-          if (commentExists) {
-            console.log("Comment already exists, not adding duplicate");
-            return oldComments;
-          }
+          if (commentExists) return oldComments;
           // Add new comment at the beginning for immediate visibility
-          const newComments = [data.comment, ...oldComments];
-          console.log("New comments array:", newComments);
-          return newComments;
+          return [data.comment, ...oldComments];
         });
         
         // Update post comment count
@@ -68,10 +53,27 @@ export default function PostDetailPage() {
       }
     };
 
+    const handleCommentVote = (data: { commentId: number; postId: number; upvotes: number; downvotes: number }) => {
+      console.log("Received comment-vote event:", data);
+      if (data.postId === parseInt(postId)) {
+        // Update comments cache with new vote counts
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
+          if (!oldComments) return oldComments;
+          return oldComments.map((comment: Comment & { author?: User }) => 
+            comment.id === data.commentId 
+              ? { ...comment, upvotes: data.upvotes, downvotes: data.downvotes }
+              : comment
+          );
+        });
+      }
+    };
+
     socket.on("new-comment", handleNewComment);
+    socket.on("comment-vote", handleCommentVote);
 
     return () => {
       socket.off("new-comment", handleNewComment);
+      socket.off("comment-vote", handleCommentVote);
     };
   }, [postId, commentSort]);
 

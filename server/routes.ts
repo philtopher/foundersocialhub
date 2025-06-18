@@ -437,6 +437,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update post vote counts
           await storage.updatePostVoteCounts(postId);
           
+          // Get updated post with new vote counts
+          const updatedPost = await storage.getPost(postId);
+          
+          // Emit real-time vote update to all clients
+          console.log("Emitting post-vote event for vote removal, post:", postId);
+          io.emit("post-vote", {
+            postId: postId,
+            upvotes: updatedPost?.upvotes || 0,
+            downvotes: updatedPost?.downvotes || 0
+          });
+          
           return res.status(200).json({ message: "Vote removed" });
         } else {
           // Change vote type
@@ -748,18 +759,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update comment vote counts
           await storage.updateCommentVoteCounts(commentId);
           
+          // Get updated comment with new vote counts
+          const updatedComment = await storage.getComment(commentId);
+          
+          // Emit real-time vote update to all clients
+          console.log("Emitting comment-vote event for vote removal, comment:", commentId);
+          io.emit("comment-vote", {
+            commentId: commentId,
+            postId: updatedComment?.postId,
+            upvotes: updatedComment?.upvotes || 0,
+            downvotes: updatedComment?.downvotes || 0
+          });
+          
           return res.status(200).json({ message: "Vote removed" });
         } else {
           // Change vote type
           await storage.updateCommentVote(userId, commentId, voteType);
+          
+          // Update comment vote counts
+          await storage.updateCommentVoteCounts(commentId);
+          
+          // Get updated comment with new vote counts
+          const updatedComment = await storage.getComment(commentId);
+          
+          // Emit real-time vote update to all clients
+          console.log("Emitting comment-vote event for vote change, comment:", commentId);
+          io.emit("comment-vote", {
+            commentId: commentId,
+            postId: updatedComment?.postId,
+            upvotes: updatedComment?.upvotes || 0,
+            downvotes: updatedComment?.downvotes || 0
+          });
         }
       } else {
         // Create new vote
         await storage.createCommentVote(userId, commentId, voteType);
+        
+        // Update comment vote counts
+        await storage.updateCommentVoteCounts(commentId);
+        
+        // Get updated comment with new vote counts
+        const updatedComment = await storage.getComment(commentId);
+        
+        // Emit real-time vote update to all clients
+        console.log("Emitting comment-vote event for new vote, comment:", commentId);
+        io.emit("comment-vote", {
+          commentId: commentId,
+          postId: updatedComment?.postId,
+          upvotes: updatedComment?.upvotes || 0,
+          downvotes: updatedComment?.downvotes || 0
+        });
       }
-      
-      // Update comment vote counts
-      await storage.updateCommentVoteCounts(commentId);
       
       res.status(200).json({ message: "Vote recorded" });
     } catch (error) {
