@@ -452,14 +452,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           // Change vote type
           await storage.updatePostVote(userId, postId, voteType);
+          
+          // Update post vote counts
+          await storage.updatePostVoteCounts(postId);
+          
+          // Get updated post with new vote counts
+          const updatedPost = await storage.getPost(postId);
+          
+          // Emit real-time vote update to all clients
+          console.log("Emitting post-vote event for vote change, post:", postId);
+          io.emit("post-vote", {
+            postId: postId,
+            upvotes: updatedPost?.upvotes || 0,
+            downvotes: updatedPost?.downvotes || 0
+          });
         }
       } else {
         // Create new vote
         await storage.createPostVote(userId, postId, voteType);
+        
+        // Update post vote counts
+        await storage.updatePostVoteCounts(postId);
+        
+        // Get updated post with new vote counts
+        const updatedPost = await storage.getPost(postId);
+        
+        // Emit real-time vote update to all clients
+        console.log("Emitting post-vote event for new vote, post:", postId);
+        io.emit("post-vote", {
+          postId: postId,
+          upvotes: updatedPost?.upvotes || 0,
+          downvotes: updatedPost?.downvotes || 0
+        });
       }
-      
-      // Update post vote counts
-      await storage.updatePostVoteCounts(postId);
       
       res.status(200).json({ message: "Vote recorded" });
     } catch (error) {

@@ -68,12 +68,25 @@ export default function PostDetailPage() {
       }
     };
 
+    const handlePostVote = (data: { postId: number; upvotes: number; downvotes: number }) => {
+      console.log("Received post-vote event:", data);
+      if (data.postId === parseInt(postId)) {
+        // Update post cache with new vote counts
+        queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
+          if (!oldPost) return oldPost;
+          return { ...oldPost, upvotes: data.upvotes, downvotes: data.downvotes };
+        });
+      }
+    };
+
     socket.on("new-comment", handleNewComment);
     socket.on("comment-vote", handleCommentVote);
+    socket.on("post-vote", handlePostVote);
 
     return () => {
       socket.off("new-comment", handleNewComment);
       socket.off("comment-vote", handleCommentVote);
+      socket.off("post-vote", handlePostVote);
     };
   }, [postId, commentSort]);
 

@@ -12,6 +12,8 @@ import { PostCard } from "@/components/post/post-card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { socket } from "@/lib/socket";
+import { queryClient } from "@/lib/queryClient";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -25,6 +27,29 @@ export default function HomePage() {
   useEffect(() => {
     setFeedType(user ? "subscribed" : "all");
   }, [user]);
+
+  // Real-time Socket.IO integration for live post votes
+  useEffect(() => {
+    const handlePostVote = (data: { postId: number; upvotes: number; downvotes: number }) => {
+      console.log("Received post-vote event on home page:", data);
+      
+      // Update posts cache with new vote counts
+      queryClient.setQueryData(["/api/posts", { sort, page, feed: feedType }], (oldPosts: any) => {
+        if (!oldPosts) return oldPosts;
+        return oldPosts.map((post: Post & { author?: User; community?: Community }) => 
+          post.id === data.postId 
+            ? { ...post, upvotes: data.upvotes, downvotes: data.downvotes }
+            : post
+        );
+      });
+    };
+
+    socket.on("post-vote", handlePostVote);
+
+    return () => {
+      socket.off("post-vote", handlePostVote);
+    };
+  }, [sort, page, feedType]);
 
   const { data: posts, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = 
     useQuery<(Post & { author?: User; community?: Community })[]>({
