@@ -49,6 +49,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { user, loginMutation, registerMutation } = useAuth();
   const [location, navigate] = useLocation();
   
@@ -58,10 +59,14 @@ export default function AuthPage() {
   
   // Redirect if user is already logged in
   useEffect(() => {
-    if (user) {
-      navigate(redirectUrl);
+    if (user && !isRedirecting) {
+      setIsRedirecting(true);
+      // Add a small delay to ensure UI updates are visible
+      setTimeout(() => {
+        navigate(redirectUrl);
+      }, 100);
     }
-  }, [user, navigate, redirectUrl]);
+  }, [user, navigate, redirectUrl, isRedirecting]);
   
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -84,7 +89,13 @@ export default function AuthPage() {
   });
   
   const onLoginSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        loginForm.reset();
+        setIsRedirecting(true);
+        // Navigation will happen automatically via useEffect when user is set
+      },
+    });
   };
   
   const onRegisterSubmit = (data: RegisterFormValues) => {
@@ -162,6 +173,11 @@ export default function AuthPage() {
                             "Log In"
                           )}
                         </Button>
+                        {loginMutation.isError && (
+                          <p className="text-sm text-red-600 mt-2">
+                            {loginMutation.error?.message || "Login failed. Please try again."}
+                          </p>
+                        )}
                       </form>
                     </Form>
                   </CardContent>

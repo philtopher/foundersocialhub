@@ -35,6 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+      }
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {
@@ -45,6 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${user.username}!`,
       });
+      // Force a brief delay to ensure state updates before navigation
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -72,6 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Registration successful",
         description: `Welcome to FounderSocials, ${user.username}!`,
       });
+      // Force a brief delay to ensure state updates before navigation
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
