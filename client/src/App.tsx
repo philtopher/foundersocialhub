@@ -33,11 +33,11 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/my-communities" component={MyCommunitiesPage} />
-      <Route path="/u/:username" component={UserProfilePage} />
-      <Route path="/:communityName" component={CommunityPage} />
-      <Route path="/:communityName/post/:postId" component={PostDetailPage} />
       <ProtectedRoute path="/create-post" component={CreatePostPage} />
+      <Route path="/u/:username" component={UserProfilePage} />
       <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
+      <Route path="/:communityName/post/:postId" component={PostDetailPage} />
+      <Route path="/:communityName" component={CommunityPage} />
       <Route component={NotFound} />
     </Switch>
   );
