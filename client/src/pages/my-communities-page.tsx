@@ -64,7 +64,7 @@ export default function MyCommunitiesPage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">My Communities</h1>
-            <Link href="/create-community">
+            <Link href="/">
               <Button className="flex items-center gap-2">
                 <Plus size={18} />
                 Create Community
