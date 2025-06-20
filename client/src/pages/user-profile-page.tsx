@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { User, Post, Comment } from "@shared/schema";
@@ -25,6 +26,7 @@ import { Loader2, Calendar, MessageSquare, Award } from "lucide-react";
 import { format } from "date-fns";
 import { CommentItem } from "@/components/comment/comment-item";
 import { useAuth } from "@/hooks/use-auth";
+import { EditProfileModal } from "@/components/profile/edit-profile-modal";
 
 export default function UserProfilePage() {
   const { username } = useParams();
