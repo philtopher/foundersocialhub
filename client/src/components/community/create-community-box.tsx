@@ -17,7 +17,7 @@ import { Plus, Users, Loader2 } from "lucide-react";
 const communitySchema = z.object({
   name: z.string()
     .min(3, "Name must be at least 3 characters")
-    .max(21, "Name cannot exceed 21 characters")
+    .max(25, "Name cannot exceed 25 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Name can only contain letters, numbers, and underscores"),
   displayName: z.string()
     .min(3, "Display name must be at least 3 characters")
