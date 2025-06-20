@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// Using GPT-4.1 as requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Analyze comment for appropriateness and generate thoughtful questions
@@ -11,7 +11,7 @@ export async function moderateComment(content: string, postTitle: string): Promi
 }> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
@@ -30,7 +30,7 @@ export async function moderateComment(content: string, postTitle: string): Promi
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.choices[0].message.content || '{}');
     
     return {
       isApproved: result.isApproved,
@@ -54,7 +54,7 @@ export async function processCommentResponse(originalComment: string, aiPrompt: 
 }> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
@@ -96,7 +96,7 @@ export async function enhanceComment(content: string, postTitle: string): Promis
 }> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
@@ -139,7 +139,7 @@ export async function generateProcessFlows(content: string, postTitle: string): 
 }> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4.1",
       messages: [
         {
           role: "system",
