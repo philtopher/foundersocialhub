@@ -139,6 +139,7 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 
 ```
 Changelog:
+- June 20, 2025. Fixed user registration form feedback - improved loading states, error handling, and form reset after successful registration
 - June 18, 2025. Initial setup
 ```
 

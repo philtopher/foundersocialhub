@@ -90,7 +90,13 @@ export default function AuthPage() {
   const onRegisterSubmit = (data: RegisterFormValues) => {
     // Remove confirmPassword as it's not in the API schema
     const { confirmPassword, ...registerData } = data;
-    registerMutation.mutate(registerData);
+    registerMutation.mutate(registerData, {
+      onSuccess: () => {
+        // Reset the form and switch to login tab on successful registration
+        registerForm.reset();
+        // Auto-redirect will happen via useEffect when user is set
+      },
+    });
   };
   
   return (
@@ -256,9 +262,14 @@ export default function AuthPage() {
                               Creating account...
                             </>
                           ) : (
-                            "Sign Up"
+                            "Create Account"
                           )}
                         </Button>
+                        {registerMutation.isError && (
+                          <p className="text-sm text-red-600 mt-2">
+                            {registerMutation.error?.message || "Registration failed. Please try again."}
+                          </p>
+                        )}
                       </form>
                     </Form>
                   </CardContent>

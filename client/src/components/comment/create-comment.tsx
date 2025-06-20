@@ -42,19 +42,32 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
 
   const commentMutation = useMutation({
     mutationFn: async (data: CommentFormValues) => {
-      return await apiRequest("POST", `/api/posts/${postId}/comments`, {
+      const response = await apiRequest("POST", `/api/posts/${postId}/comments`, {
         ...data,
         parentId: parentId || null,
       });
+      return await response.json();
     },
     onMutate: () => {
       setIsSubmitting(true);
     },
-    onSuccess: () => {
+    onSuccess: (newComment) => {
       reset();
-      queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}`] });
+      // Optimistically update the comments list without full refetch
+      queryClient.setQueryData([`/api/posts/${postId}/comments`], (oldComments: any) => {
+        if (!oldComments) return [newComment];
+        return [newComment, ...oldComments];
+      });
+      // Update post comment count
+      queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
+        if (!oldPost) return oldPost;
+        return { ...oldPost, commentCount: (oldPost.commentCount || 0) + 1 };
+      });
       if (onSuccess) onSuccess();
+      toast({
+        title: "Comment posted",
+        description: "Your comment has been added successfully",
+      });
     },
     onError: (error) => {
       toast({
@@ -68,7 +81,9 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
     },
   });
 
-  const onSubmit = (data: CommentFormValues) => {
+  const onSubmit = (data: CommentFormValues, event?: React.BaseSyntheticEvent) => {
+    if (event) event.preventDefault();
+    console.log("Submitting comment via SPA, should not reload page");
     if (!user) {
       toast({
         title: "Login Required",
@@ -77,7 +92,6 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       });
       return;
     }
-    
     commentMutation.mutate(data);
   };
 
