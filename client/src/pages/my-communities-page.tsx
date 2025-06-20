@@ -11,6 +11,7 @@ import { Search, Plus, Users, Lock, Globe, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
+import { CreateCommunityBox } from "@/components/community/create-community-box";
 
 type CommunityWithRole = Community & { role: string };
 
@@ -64,12 +65,9 @@ export default function MyCommunitiesPage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">My Communities</h1>
-            <Link href="/">
-              <Button className="flex items-center gap-2">
-                <Plus size={18} />
-                Create Community
-              </Button>
-            </Link>
+            <div className="w-48">
+              <CreateCommunityBox />
+            </div>
           </div>
 
           <div className="mb-6">
