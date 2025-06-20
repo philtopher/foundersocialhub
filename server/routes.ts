@@ -50,7 +50,14 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
+  // Handle both dot and colon separators for backwards compatibility
+  const parts = stored.includes(':') ? stored.split(':') : stored.split('.');
+  const [salt, hashed] = parts;
+  
+  if (!salt || !hashed) {
+    throw new Error('Invalid password format');
+  }
+  
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return hashedBuf.equals(suppliedBuf);
