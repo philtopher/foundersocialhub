@@ -30,18 +30,23 @@ export default function UserProfilePage() {
   const { username } = useParams();
   const { user: currentUser } = useAuth();
   
+  // If no username in params, show current user's profile
+  const isOwnProfile = !username;
+  const profileUsername = username || currentUser?.username;
+  
   const { data: user, isLoading: userLoading } = useQuery<Omit<User, "password">>({
-    queryKey: [`/api/users/${username}`],
+    queryKey: isOwnProfile ? ["/api/user"] : [`/api/users/${profileUsername}`],
+    enabled: !!profileUsername,
   });
 
   const { data: posts, isLoading: postsLoading } = useQuery<Post[]>({
-    queryKey: [`/api/users/${username}/posts`],
-    enabled: !!user,
+    queryKey: [`/api/users/${profileUsername}/posts`],
+    enabled: !!user && !!profileUsername,
   });
 
   const { data: comments, isLoading: commentsLoading } = useQuery<Comment[]>({
-    queryKey: [`/api/users/${username}/comments`],
-    enabled: !!user,
+    queryKey: [`/api/users/${profileUsername}/comments`],
+    enabled: !!user && !!profileUsername,
   });
 
   if (userLoading) {

@@ -16,6 +16,8 @@ import MyCommunitiesPage from "@/pages/my-communities-page";
 import HowItWorksPage from "@/pages/how-it-works-page";
 import TermsPage from "@/pages/terms-page";
 import PrivacyPage from "@/pages/privacy-page";
+import NotificationsPage from "@/pages/notifications-page";
+import ExplorePage from "@/pages/explore-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
@@ -34,6 +36,9 @@ function Router() {
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/my-communities" component={MyCommunitiesPage} />
       <ProtectedRoute path="/create-post" component={CreatePostPage} />
+      <ProtectedRoute path="/profile" component={UserProfilePage} />
+      <ProtectedRoute path="/notifications" component={NotificationsPage} />
+      <ProtectedRoute path="/explore" component={ExplorePage} />
       <Route path="/u/:username" component={UserProfilePage} />
       <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
       <Route path="/:communityName/post/:postId" component={PostDetailPage} />

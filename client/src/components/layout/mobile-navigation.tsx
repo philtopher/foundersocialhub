@@ -18,7 +18,7 @@ export function MobileNavigation() {
         <Compass className="h-5 w-5" />
         <span className="text-xs mt-1">Explore</span>
       </Link>
-      <Link href="/submit" className={`flex flex-col items-center px-3 py-1 ${isActive("/submit")} hover:text-primary`}>
+      <Link href="/create-post" className={`flex flex-col items-center px-3 py-1 ${isActive("/create-post")} hover:text-primary`}>
         <PlusCircle className="h-5 w-5" />
         <span className="text-xs mt-1">Create</span>
       </Link>
