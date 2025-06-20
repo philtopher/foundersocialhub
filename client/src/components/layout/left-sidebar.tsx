@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Community } from "@shared/schema";
 import { Home, TrendingUp, Clock, Bookmark, Users, Settings, Flame, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { CreateCommunityBox } from "@/components/community/create-community-box";
 
 export function LeftSidebar() {
   const { user } = useAuth();
@@ -57,6 +58,11 @@ export function LeftSidebar() {
         </div>
         
         <Link href="/communities" className="text-secondary hover:underline text-sm block mt-4">View All Communities</Link>
+        
+        {/* Create Community Button */}
+        <div className="mt-4">
+          <CreateCommunityBox />
+        </div>
       </div>
       
       <div className="bg-white rounded-lg border border-border p-4">
