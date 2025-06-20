@@ -19,14 +19,17 @@ export default function PostDetailPage() {
   const { communityName, postId } = useParams();
   const [, navigate] = useLocation();
   const [commentSort, setCommentSort] = useState<"top" | "new" | "old">("top");
+  const [localComments, setLocalComments] = useState<any[]>([]);
 
   const { data: post, isLoading: postLoading } = useQuery<Post & { author?: User; community?: Community }>({
     queryKey: [`/api/posts/${postId}`],
   });
 
-  const { data: comments, isLoading: commentsLoading } = useQuery<(Comment & { author?: User; replies?: Array<Comment & { author?: User }> })[]>({
+  const { data: comments, isLoading: commentsLoading, refetch: refetchComments } = useQuery<(Comment & { author?: User; replies?: Array<Comment & { author?: User }> })[]>({
     queryKey: [`/api/posts/${postId}/comments`, { sort: commentSort }],
     enabled: !!postId,
+    staleTime: 0, // Always consider data stale for real-time updates
+    refetchOnWindowFocus: true,
   });
 
   // Real-time Socket.IO integration for live comments and votes
@@ -81,6 +84,9 @@ export default function PostDetailPage() {
           if (!oldPost) return oldPost;
           return { ...oldPost, commentCount: data.commentCount };
         });
+        
+        // Force immediate UI update
+        refetchComments();
       }
     };
 
