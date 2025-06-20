@@ -50,9 +50,9 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
       website: user?.website || "",
       company: user?.company || "",
       jobTitle: user?.jobTitle || "",
-      profileImageUrl: user?.profileImageUrl || "",
+      profileImageUrl: user?.profileImageUrl || user?.avatarUrl || "",
       coverImageUrl: user?.coverImageUrl || "",
-      privacy: "public",
+      privacy: user?.privacy || "public",
     },
   });
 
@@ -252,9 +252,9 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 bg-light-darker rounded-lg">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={form.watch("profileImageUrl") || user.profileImageUrl} />
+                    <AvatarImage src={form.watch("profileImageUrl") || user?.profileImageUrl || user?.avatarUrl} />
                     <AvatarFallback className="bg-primary text-white text-xl">
-                      {user.username?.charAt(0).toUpperCase()}
+                      {user?.username?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>

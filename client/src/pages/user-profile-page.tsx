@@ -30,6 +30,7 @@ import { EditProfileModal } from "@/components/profile/edit-profile-modal";
 
 export default function UserProfilePage() {
   const { username } = useParams();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { user: currentUser } = useAuth();
   
   // If no username in params, show current user's profile
@@ -147,7 +148,7 @@ export default function UserProfilePage() {
                     <Button
                       variant="outline"
                       className="border-neutral-light text-neutral hover:bg-light-darker"
-                      onClick={() => {/* Navigate to edit profile page */}}
+                      onClick={() => setIsEditModalOpen(true)}
                     >
                       Edit Profile
                     </Button>
@@ -231,6 +232,12 @@ export default function UserProfilePage() {
         </div>
       </main>
       <MobileNavigation />
+      
+      {/* Edit Profile Modal */}
+      <EditProfileModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+      />
     </>
   );
 }

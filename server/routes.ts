@@ -1231,6 +1231,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update user profile" });
     }
   });
+
+  // Comprehensive Facebook-style profile update endpoint
+  app.put("/api/user/profile", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Allow updating comprehensive profile fields
+      const { 
+        firstName, lastName, bio, location, website, 
+        company, jobTitle, profileImageUrl, coverImageUrl, privacy 
+      } = req.body;
+      
+      const updateData: any = { updatedAt: new Date() };
+      
+      if (firstName !== undefined) updateData.firstName = firstName === "" ? null : firstName;
+      if (lastName !== undefined) updateData.lastName = lastName === "" ? null : lastName;
+      if (bio !== undefined) updateData.bio = bio === "" ? null : bio;
+      if (location !== undefined) updateData.location = location === "" ? null : location;
+      if (website !== undefined) updateData.website = website === "" ? null : website;
+      if (company !== undefined) updateData.company = company === "" ? null : company;
+      if (jobTitle !== undefined) updateData.jobTitle = jobTitle === "" ? null : jobTitle;
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl === "" ? null : profileImageUrl;
+      if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl === "" ? null : coverImageUrl;
+      if (privacy !== undefined) updateData.privacy = privacy;
+      
+      const [updatedUser] = await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+      
+      // Exclude sensitive information
+      const { password, resetToken, resetTokenExpiry, ...profile } = updatedUser;
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
   
   // User account routes
   app.patch("/api/account", isAuthenticated, async (req, res) => {
