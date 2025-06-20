@@ -105,6 +105,7 @@ export default function AuthPage() {
       onSuccess: () => {
         // Reset the form and switch to login tab on successful registration
         registerForm.reset();
+        setIsRedirecting(true);
         // Auto-redirect will happen via useEffect when user is set
       },
     });
@@ -114,6 +115,14 @@ export default function AuthPage() {
     <>
       <Header />
       <main className="container mx-auto px-4 py-8">
+        {isRedirecting && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg text-center">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-lg font-medium">Taking you to your dashboard...</p>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
           <div className="lg:w-1/2">
             <Tabs defaultValue="login" value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
