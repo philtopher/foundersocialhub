@@ -4,7 +4,7 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Analyze comment for appropriateness and generate thoughtful questions
-export async function moderateComment(content: string, postTitle: string): Promise<{
+export async function moderateComment(commentContent: string, postTitle: string): Promise<{
   isApproved: boolean;
   aiPrompt?: string;
   reason?: string;
@@ -30,7 +30,9 @@ export async function moderateComment(content: string, postTitle: string): Promi
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const content = response.choices[0].message.content;
+    if (!content) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(content);
     
     return {
       isApproved: result.isApproved,
@@ -73,7 +75,9 @@ export async function processCommentResponse(originalComment: string, aiPrompt: 
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(content);
     
     return {
       finalComment: result.finalComment,
@@ -116,7 +120,7 @@ export async function enhanceComment(content: string, postTitle: string): Promis
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.choices[0].message.content || '{}');
     
     return {
       enhancedContent: result.enhancedContent,
@@ -159,7 +163,7 @@ export async function generateProcessFlows(content: string, postTitle: string): 
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.choices[0].message.content || '{}');
     
     return {
       processFlows: result.processFlows || [],
