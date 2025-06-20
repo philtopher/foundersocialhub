@@ -24,15 +24,15 @@ export async function moderateComment(commentContent: string, postTitle: string)
         },
         {
           role: "user",
-          content: `Post Title: ${postTitle}\nComment: ${content}`
+          content: `Post Title: ${postTitle}\nComment: ${commentContent}`
         }
       ],
       response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) throw new Error("No response content from OpenAI");
-    const result = JSON.parse(content);
+    const responseContent = response.choices[0].message.content;
+    if (!responseContent) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(responseContent);
     
     return {
       isApproved: result.isApproved,
@@ -75,9 +75,9 @@ export async function processCommentResponse(originalComment: string, aiPrompt: 
       response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) throw new Error("No response content from OpenAI");
-    const result = JSON.parse(content);
+    const responseContent = response.choices[0].message.content;
+    if (!responseContent) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(responseContent);
     
     return {
       finalComment: result.finalComment,
@@ -94,7 +94,7 @@ export async function processCommentResponse(originalComment: string, aiPrompt: 
 }
 
 // Enhance a comment with AI to make it more valuable/informative
-export async function enhanceComment(content: string, postTitle: string): Promise<{
+export async function enhanceComment(commentContent: string, postTitle: string): Promise<{
   enhancedContent: string;
   isApproved: boolean;
 }> {
@@ -114,13 +114,15 @@ export async function enhanceComment(content: string, postTitle: string): Promis
         },
         {
           role: "user",
-          content: `Post Title: ${postTitle}\nOriginal Comment: ${content}`
+          content: `Post Title: ${postTitle}\nOriginal Comment: ${commentContent}`
         }
       ],
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const responseContent = response.choices[0].message.content;
+    if (!responseContent) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(responseContent);
     
     return {
       enhancedContent: result.enhancedContent,
@@ -130,14 +132,14 @@ export async function enhanceComment(content: string, postTitle: string): Promis
     console.error("OpenAI comment enhancement error:", error);
     // Fallback - return the original comment
     return {
-      enhancedContent: content,
+      enhancedContent: commentContent,
       isApproved: true
     };
   }
 }
 
 // Generate process flows based on a comment
-export async function generateProcessFlows(content: string, postTitle: string): Promise<{
+export async function generateProcessFlows(commentContent: string, postTitle: string): Promise<{
   processFlows: any[];
   isApproved: boolean;
 }> {
@@ -157,13 +159,15 @@ export async function generateProcessFlows(content: string, postTitle: string): 
         },
         {
           role: "user",
-          content: `Post Title: ${postTitle}\nComment: ${content}`
+          content: `Post Title: ${postTitle}\nComment: ${commentContent}`
         }
       ],
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const responseContent = response.choices[0].message.content;
+    if (!responseContent) throw new Error("No response content from OpenAI");
+    const result = JSON.parse(responseContent);
     
     return {
       processFlows: result.processFlows || [],

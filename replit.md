@@ -95,7 +95,7 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 - **PayPal**: Alternative payment option for global accessibility
 
 ### AI Services
-- **OpenAI**: GPT-4o model for content analysis and enhancement
+- **OpenAI**: GPT-4.1 model for content analysis and enhancement
 
 ### Email Services
 - **SendGrid**: Transactional email delivery for notifications and confirmations
