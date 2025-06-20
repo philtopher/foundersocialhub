@@ -132,7 +132,7 @@ export function CreateCommunityBox() {
                       <Input placeholder="mycommunity" {...field} />
                     </FormControl>
                     <FormDescription>
-                      This will be used in the URL. Only letters, numbers, and underscores allowed.
+                      This will be used in the URL. Spaces will be converted to underscores.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
