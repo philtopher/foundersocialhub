@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Community } from "@shared/schema";
-import { Home, TrendingUp, Clock, Bookmark, Users, Settings, Flame, Plus } from "lucide-react";
+import { Home, TrendingUp, Clock, Bookmark, Users, Settings, Flame, Plus, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { CreateCommunityBox } from "@/components/community/create-community-box";
 
@@ -71,6 +71,11 @@ export function LeftSidebar() {
           <li>
             <Link href="/create-post" className="text-foreground hover:text-primary flex items-center">
               <Plus className="h-4 w-4 mr-2" /> Create Post
+            </Link>
+          </li>
+          <li>
+            <Link href="/my-posts" className="text-foreground hover:text-primary flex items-center">
+              <FileText className="h-4 w-4 mr-2" /> My Posts
             </Link>
           </li>
           <li>
