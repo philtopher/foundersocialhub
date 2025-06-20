@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 import { Comment, Post, User, Community } from "@shared/schema";
 import { Header } from "@/components/layout/header";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
@@ -8,9 +9,9 @@ import { RightSidebar } from "@/components/layout/right-sidebar";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { PostCard } from "@/components/post/post-card";
 import { CreateComment } from "@/components/comment/create-comment";
-import { CommentItem } from "@/components/comment/comment-item";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { socket } from "@/lib/socket";
 import { queryClient } from "@/lib/queryClient";
 
