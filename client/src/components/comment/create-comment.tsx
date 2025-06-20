@@ -41,7 +41,12 @@ export function CreateComment({ postId, parentId, onSuccess, onCommentAdded }: C
     },
   });
 
-  const commentMutation = useMutation({
+  const commentMutation = useMutation<
+    any, 
+    Error, 
+    CommentFormValues, 
+    { optimisticComment?: any }
+  >({
     mutationFn: async (data: CommentFormValues) => {
       const response = await apiRequest("POST", `/api/posts/${postId}/comments`, {
         ...data,
