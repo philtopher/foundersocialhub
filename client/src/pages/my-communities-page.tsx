@@ -119,13 +119,9 @@ export default function MyCommunitiesPage() {
                             </Link>
                             {getVisibilityIcon(community.visibility)}
                           </div>
-                          <p className="text-sm text-neutral">{community.name}</p>
+                          <p className="text-sm text-neutral">{community.memberCount} {community.memberCount === 1 ? 'member' : 'members'}</p>
                         </div>
                         <div className="flex items-center">
-                          <div className="flex items-center mr-4">
-                            <Users size={16} className="text-neutral mr-1" />
-                            <span className="text-sm text-neutral">{community.memberCount}</span>
-                          </div>
                           <Button variant="outline" size="sm" asChild>
                             <Link href={`/${community.name}`}>View</Link>
                           </Button>
@@ -185,7 +181,7 @@ export default function MyCommunitiesPage() {
                                 {community.role === "admin" ? "Admin" : "Moderator"}
                               </span>
                             </div>
-                            <p className="text-sm text-neutral">{community.name}</p>
+                            <p className="text-sm text-neutral">{community.memberCount} {community.memberCount === 1 ? 'member' : 'members'}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" asChild>
