@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/communities/:communityId/leave", isAuthenticated, async (req, res) => {
     try {
       const communityId = parseInt(req.params.communityId);
-      const userId = req.user!.id;
+      const userId = getUserId(req);
       
       const membership = await storage.getCommunityMembership(userId, communityId);
       if (!membership) {
@@ -326,6 +326,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error leaving community:", error);
       res.status(500).json({ message: "Failed to leave community" });
+    }
+  });
+
+  // User communities route
+  app.get("/api/user/communities", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const communities = await storage.getUserCommunities(userId);
+      res.json(communities);
+    } catch (error) {
+      console.error("Error fetching user communities:", error);
+      res.status(500).json({ message: "Failed to fetch user communities" });
+    }
+  });
+
+  // User posts route
+  app.get("/api/user/posts", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const posts = await storage.getUserPosts(userId, page, limit);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      res.status(500).json({ message: "Failed to fetch user posts" });
     }
   });
 
@@ -642,7 +669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments/:commentId/respond-to-ai", isAuthenticated, async (req, res) => {
     try {
       const commentId = parseInt(req.params.commentId);
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const response = req.body.response;
       
       // Check if comment exists and belongs to the user
@@ -707,7 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Decrement remaining prompts for standard users
-      if (user.subscriptionPlan === "standard" && typeof user.remainingPrompts === "number") {
+      if (user.subscriptionPlan === "standard" && user.remainingPrompts && user.remainingPrompts > 0) {
         await storage.updateUserRemainingPrompts(Number(user.id), user.remainingPrompts - 1);
       }
       
@@ -1302,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     app.post("/api/test/email/welcome", isAuthenticated, async (req, res) => {
       try {
-        const userId = Number(req.user!.id);
+        const userId = getUserId(req);
         const user = await storage.getUser(userId);
         
         if (!user) {
