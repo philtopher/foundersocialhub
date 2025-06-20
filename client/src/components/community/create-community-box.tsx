@@ -15,14 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Users, Loader2 } from "lucide-react";
 
 const communitySchema = z.object({
-  name: z.string()
-    .min(3, "Name must be at least 3 characters")
-    .max(25, "Name cannot exceed 25 characters")
-    .regex(/^[a-zA-Z0-9_ ]+$/, "Name can only contain letters, numbers, underscores, and spaces")
-    .transform((val) => val.replace(/\s+/g, '_').toLowerCase()),
   displayName: z.string()
-    .min(3, "Display name must be at least 3 characters")
-    .max(50, "Display name cannot exceed 50 characters"),
+    .min(3, "Community name must be at least 3 characters")
+    .max(50, "Community name cannot exceed 50 characters"),
+  name: z.string().optional(),
   description: z.string()
     .min(10, "Description must be at least 10 characters")
     .max(500, "Description cannot exceed 500 characters"),
@@ -41,7 +37,6 @@ export function CreateCommunityBox() {
   const form = useForm<CommunityFormValues>({
     resolver: zodResolver(communitySchema),
     defaultValues: {
-      name: "",
       displayName: "",
       description: "",
       visibility: "public",
@@ -86,7 +81,19 @@ export function CreateCommunityBox() {
   });
 
   const onSubmit = (data: CommunityFormValues) => {
-    createCommunityMutation.mutate(data);
+    // Auto-generate URL-safe name from display name
+    const urlSafeName = data.displayName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .substring(0, 25); // Limit to 25 characters
+    
+    const communityData = {
+      ...data,
+      name: urlSafeName,
+    };
+    
+    createCommunityMutation.mutate(communityData);
   };
 
   const handleOpenDialog = () => {
@@ -124,32 +131,15 @@ export function CreateCommunityBox() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="displayName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Community Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="mycommunity" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This will be used in the URL. Spaces will be converted to underscores.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="displayName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl>
                       <Input placeholder="My Awesome Community" {...field} />
                     </FormControl>
                     <FormDescription>
-                      This is how your community will appear to users.
+                      What would you like to call your community? We'll create a URL-friendly version automatically.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
