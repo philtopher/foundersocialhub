@@ -37,25 +37,40 @@ export default function PostDetailPage() {
     const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
       console.log("[Socket] Received new-comment event:", data);
       if (data.postId === parseInt(postId)) {
-        let updated = false;
-        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
-          if (!oldComments) {
-            updated = true;
-            return [data.comment];
-          }
+        // Update all possible sort variations immediately
+        const updateFn = (oldComments: any) => {
+          if (!oldComments) return [data.comment];
           // Check if comment already exists to avoid duplicates
           const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
           if (commentExists) return oldComments;
-          updated = true;
           // Add new comment at the beginning for immediate visibility
           return [data.comment, ...oldComments];
+        };
+
+        // Update all sort order caches
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], updateFn);
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], updateFn);
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "old" }], (oldComments: any) => {
+          if (!oldComments) return [data.comment];
+          const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
+          if (commentExists) return oldComments;
+          return [...oldComments, data.comment];
         });
-        // If update did not happen, mark as missed
-        if (!updated) missedEvent = true;
+        
+        // Update the current sort as well
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], updateFn);
+        
         // Update post comment count
         queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
           if (!oldPost) return oldPost;
           return { ...oldPost, commentCount: data.commentCount };
+        });
+        
+        // Force UI re-render
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/posts/${postId}/comments`],
+          exact: false,
+          refetchType: 'active'
         });
       }
     };
@@ -221,7 +236,7 @@ export default function PostDetailPage() {
               
               {/* Comment Form */}
               <div className="mb-6">
-                <CreateComment postId={parseInt(postId)} />
+                <CreateComment postId={parseInt(postId!)} />
               </div>
               
               {/* Comments List */}
@@ -232,7 +247,36 @@ export default function PostDetailPage() {
               ) : comments && comments.length > 0 ? (
                 <div className="space-y-4">
                   {comments.map(comment => (
-                    <CommentItem key={comment.id} comment={comment} postId={parseInt(postId)} />
+                    <div key={comment.id} className="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                      <div className="flex space-x-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={comment.author?.avatarUrl || ""} alt={comment.author?.username || "User"} />
+                          <AvatarFallback>
+                            {comment.author?.username?.substring(0, 2).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm">{comment.author?.displayName || comment.author?.username}</span>
+                            <span className="text-xs text-gray-500">
+                              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-800 mb-2">{comment.content}</p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <button className="flex items-center gap-1 text-gray-500 hover:text-blue-600">
+                              <ThumbsUp className="w-4 h-4" />
+                              {comment.upvotes || 0}
+                            </button>
+                            <button className="flex items-center gap-1 text-gray-500 hover:text-red-600">
+                              <ThumbsDown className="w-4 h-4" />
+                              {comment.downvotes || 0}
+                            </button>
+                            <button className="text-gray-500 hover:text-blue-600">Reply</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (

@@ -53,24 +53,38 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
     },
     onSuccess: (newComment) => {
       reset();
-      // Optimistically update the comments list for all sort orders
-      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], (oldComments: any) => {
+      // Immediately update all possible comment query variations
+      const updateFn = (oldComments: any) => {
         if (!oldComments) return [newComment];
+        // Check if comment already exists to avoid duplicates
+        const exists = oldComments.some((c: any) => c.id === newComment.id);
+        if (exists) return oldComments;
         return [newComment, ...oldComments];
-      });
-      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], (oldComments: any) => {
-        if (!oldComments) return [newComment];
-        return [newComment, ...oldComments];
-      });
+      };
+      
+      // Update all sort variations
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], updateFn);
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], updateFn);
       queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "old" }], (oldComments: any) => {
         if (!oldComments) return [newComment];
+        const exists = oldComments.some((c: any) => c.id === newComment.id);
+        if (exists) return oldComments;
         return [...oldComments, newComment];
       });
+      
+      // Force refetch to ensure UI updates
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/posts/${postId}/comments`],
+        exact: false,
+        refetchType: 'active'
+      });
+      
       // Update post comment count
       queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
         if (!oldPost) return oldPost;
         return { ...oldPost, commentCount: (oldPost.commentCount || 0) + 1 };
       });
+      
       if (onSuccess) onSuccess();
       toast({
         title: "Comment posted",
