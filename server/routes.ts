@@ -50,30 +50,7 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  console.log('Stored password format:', stored);
-  
-  let salt, hashed;
-  
-  if (stored.includes(':')) {
-    // New format: salt:hash
-    const parts = stored.split(':');
-    salt = parts[0];
-    hashed = parts[1];
-    console.log('Using colon format - salt:', salt, 'hashed length:', hashed?.length);
-  } else if (stored.includes('.')) {
-    // Old format: hash.salt
-    const parts = stored.split('.');
-    hashed = parts[0];
-    salt = parts[1];
-    console.log('Using dot format - salt:', salt, 'hashed length:', hashed?.length);
-  } else {
-    throw new Error('Invalid password format - no separator found');
-  }
-  
-  if (!salt || !hashed) {
-    throw new Error(`Invalid password components - salt: ${salt}, hashed: ${hashed}`);
-  }
-  
+  const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return hashedBuf.equals(suppliedBuf);
