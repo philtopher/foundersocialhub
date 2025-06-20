@@ -55,7 +55,7 @@ export default function CreatePostPage() {
 
   const { data: selectedCommunity } = useQuery<Community>({
     queryKey: [`/api/communities/${communityName}`],
-    enabled: !!communityName,
+    enabled: !!communityName && communityName !== "submit",
   });
 
   const form = useForm<PostFormValues>({
