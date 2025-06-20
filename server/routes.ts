@@ -190,6 +190,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to get user ID from request
+  const getUserId = (req: any): number => {
+    if (req.user && typeof req.user === 'object' && 'claims' in req.user) {
+      return Number(req.user.claims.sub);
+    } else {
+      return Number(req.user.id);
+    }
+  };
+
   // Middleware to check if user is authenticated
   const isAuthenticated = (req: Request, res: Response, next: Function) => {
     if (req.isAuthenticated()) {
@@ -234,13 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/communities", isAuthenticated, async (req, res) => {
     try {
-      // Get user ID based on auth type
-      let userId;
-      if (req.user && typeof req.user === 'object' && 'claims' in req.user) {
-        userId = (req.user as any).claims.sub;
-      } else {
-        userId = (req.user as any).id;
-      }
+      const userId = getUserId(req);
       
       const validatedData = insertCommunitySchema.parse({
         ...req.body,
@@ -391,16 +394,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Community not found" });
       }
       
-      // Get user ID based on auth type
-      let userId;
-      if (req.user && typeof req.user === 'object' && 'claims' in req.user) {
-        userId = (req.user as any).claims.sub;
-      } else {
-        userId = (req.user as any).id;
-      }
+      const userId = getUserId(req);
       
       // Check if user is a member of the community
-      const membership = await storage.getCommunityMembership(Number(userId), communityId);
+      const membership = await storage.getCommunityMembership(userId, communityId);
       if (!membership && community.visibility !== "public") {
         return res.status(403).json({ message: "You must be a member to post in this community" });
       }
@@ -410,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertPostSchema.parse({
         ...req.body,
-        authorId: Number(userId),
+        authorId: userId,
         communityId,
         slug: `${slug}-${Date.now()}`
       });
@@ -429,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/posts/:postId/vote", isAuthenticated, async (req, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const voteType = req.body.voteType as "upvote" | "downvote";
       
       if (voteType !== "upvote" && voteType !== "downvote") {
@@ -526,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/posts/:postId/comments", isAuthenticated, async (req, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const parentId = req.body.parentId ? parseInt(req.body.parentId) : null;
       
       // Check if post exists
@@ -776,7 +773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments/:commentId/vote", isAuthenticated, async (req, res) => {
     try {
       const commentId = parseInt(req.params.commentId);
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const voteType = req.body.voteType as "upvote" | "downvote";
       
       if (voteType !== "upvote" && voteType !== "downvote") {
