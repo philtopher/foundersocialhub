@@ -949,7 +949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subscription management routes
   app.post("/api/payments/cancel-subscription", isAuthenticated, async (req, res) => {
     try {
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1077,7 +1077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment status route
   app.get("/api/payments/status", isAuthenticated, async (req, res) => {
     try {
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User profile routes
   app.get("/api/profile", isAuthenticated, async (req, res) => {
     try {
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1172,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.patch("/api/profile", isAuthenticated, async (req, res) => {
     try {
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1205,7 +1205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User account routes
   app.patch("/api/account", isAuthenticated, async (req, res) => {
     try {
-      const userId = Number(req.user!.id);
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1285,7 +1285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.NODE_ENV !== "production") {
     app.post("/api/test/email/payment-confirmation", isAuthenticated, async (req, res) => {
       try {
-        const userId = Number(req.user!.id);
+        const userId = getUserId(req);
         const user = await storage.getUser(userId);
         
         if (!user) {
