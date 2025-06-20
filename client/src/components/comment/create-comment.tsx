@@ -21,9 +21,10 @@ interface CreateCommentProps {
   postId: number;
   parentId?: number;
   onSuccess?: () => void;
+  onCommentAdded?: (comment: any) => void;
 }
 
-export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProps) {
+export function CreateComment({ postId, parentId, onSuccess, onCommentAdded }: CreateCommentProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,14 +49,40 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       });
       return await response.json();
     },
-    onSuccess: (newComment) => {
+    onMutate: async (data: CommentFormValues) => {
+      setIsSubmitting(true);
+      
+      // Create optimistic comment for instant display
+      const optimisticComment = {
+        id: `temp-${Date.now()}`,
+        content: data.content,
+        authorId: user?.id,
+        postId: postId,
+        parentId: parentId || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        upvotes: 0,
+        downvotes: 0,
+        replyCount: 0,
+        status: "approved",
+        author: user,
+        isOptimistic: true
+      };
+
+      // Immediately add to parent component
+      if (onCommentAdded) {
+        onCommentAdded(optimisticComment);
+      }
+
+      return { optimisticComment };
+    },
+    onSuccess: (newComment, variables, context) => {
       reset();
       
-      // Force immediate cache invalidation and refetch
-      queryClient.invalidateQueries({ 
-        queryKey: [`/api/posts/${postId}/comments`],
-        exact: false
-      });
+      // Replace optimistic comment with real one
+      if (onCommentAdded && context?.optimisticComment) {
+        onCommentAdded({ ...newComment, replaceOptimistic: context.optimisticComment.id });
+      }
       
       // Update post comment count
       queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
@@ -64,21 +91,17 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       });
       
       if (onSuccess) onSuccess();
-      
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been added successfully",
-      });
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // Remove optimistic comment on error
+      if (onCommentAdded && context?.optimisticComment) {
+        onCommentAdded({ removeOptimistic: context.optimisticComment.id });
+      }
       toast({
         title: "Error",
         description: `Failed to submit comment: ${error.message}`,
         variant: "destructive",
       });
-    },
-    onMutate: () => {
-      setIsSubmitting(true);
     },
     onSettled: () => {
       setIsSubmitting(false);

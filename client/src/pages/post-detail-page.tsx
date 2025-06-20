@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -20,17 +20,52 @@ export default function PostDetailPage() {
   const [, navigate] = useLocation();
   const [commentSort, setCommentSort] = useState<"top" | "new" | "old">("top");
   const [localComments, setLocalComments] = useState<any[]>([]);
-
+  
   const { data: post, isLoading: postLoading } = useQuery<Post & { author?: User; community?: Community }>({
     queryKey: [`/api/posts/${postId}`],
   });
 
-  const { data: comments, isLoading: commentsLoading, refetch: refetchComments } = useQuery<(Comment & { author?: User; replies?: Array<Comment & { author?: User }> })[]>({
+  const { data: serverComments, isLoading: commentsLoading } = useQuery<(Comment & { author?: User; replies?: Array<Comment & { author?: User }> })[]>({
     queryKey: [`/api/posts/${postId}/comments`, { sort: commentSort }],
     enabled: !!postId,
-    staleTime: 0, // Always consider data stale for real-time updates
-    refetchOnWindowFocus: true,
   });
+
+  // Facebook-style comment handling
+  const handleCommentAdded = (comment: any) => {
+    if (comment.replaceOptimistic) {
+      // Replace optimistic comment with real one
+      setLocalComments(prev => 
+        prev.map(c => c.id === comment.replaceOptimistic ? comment : c)
+      );
+    } else if (comment.removeOptimistic) {
+      // Remove failed optimistic comment
+      setLocalComments(prev => 
+        prev.filter(c => c.id !== comment.removeOptimistic)
+      );
+    } else {
+      // Add new optimistic comment
+      setLocalComments(prev => [comment, ...prev]);
+    }
+  };
+
+  // Merge server and local comments, removing duplicates
+  const allComments = React.useMemo(() => {
+    const server = serverComments || [];
+    const combined = [...localComments, ...server];
+    
+    // Remove duplicates (prefer server comments over optimistic ones)
+    const seen = new Set();
+    return combined.filter(comment => {
+      const key = comment.isOptimistic ? comment.id : `server-${comment.id}`;
+      if (seen.has(key) || (comment.isOptimistic && server.some(s => s.content === comment.content))) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }, [serverComments, localComments]);
+
+  const comments = allComments;
 
   // Real-time Socket.IO integration for live comments and votes
   useEffect(() => {
@@ -85,8 +120,11 @@ export default function PostDetailPage() {
           return { ...oldPost, commentCount: data.commentCount };
         });
         
-        // Force immediate UI update
-        refetchComments();
+        // Force immediate UI update by invalidating queries
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/posts/${postId}/comments`],
+          exact: false
+        });
       }
     };
 
@@ -251,7 +289,10 @@ export default function PostDetailPage() {
               
               {/* Comment Form */}
               <div className="mb-6">
-                <CreateComment postId={parseInt(postId!)} />
+                <CreateComment 
+                  postId={parseInt(postId!)} 
+                  onCommentAdded={handleCommentAdded}
+                />
               </div>
               
               {/* Comments List */}
