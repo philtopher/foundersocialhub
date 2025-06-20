@@ -36,7 +36,7 @@ function Router() {
       <Route path="/u/:username" component={UserProfilePage} />
       <Route path="/:communityName" component={CommunityPage} />
       <Route path="/:communityName/post/:postId" component={PostDetailPage} />
-      <ProtectedRoute path="/submit" component={CreatePostPage} />
+      <ProtectedRoute path="/create-post" component={CreatePostPage} />
       <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
       <Route component={NotFound} />
     </Switch>

@@ -63,7 +63,7 @@ export function LeftSidebar() {
         <h3 className="font-bold text-lg mb-3">Quick Links</h3>
         <ul className="space-y-2">
           <li>
-            <Link href="/submit" className="text-foreground hover:text-primary flex items-center">
+            <Link href="/create-post" className="text-foreground hover:text-primary flex items-center">
               <Plus className="h-4 w-4 mr-2" /> Create Post
             </Link>
           </li>

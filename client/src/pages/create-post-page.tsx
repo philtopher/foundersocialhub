@@ -63,7 +63,7 @@ export default function CreatePostPage() {
     defaultValues: {
       title: "",
       content: "",
-      communityId: selectedCommunity ? selectedCommunity.id.toString() : "",
+      communityId: "",
       imageUrl: "",
     },
   });
@@ -107,8 +107,19 @@ export default function CreatePostPage() {
   });
 
   const onSubmit = (data: PostFormValues) => {
-    console.log("Form submission data:", data);
+    console.log("Form submission triggered");
+    console.log("Form data:", data);
     console.log("Form errors:", form.formState.errors);
+    console.log("Form state:", form.formState);
+    
+    // Validate manually
+    const result = postSchema.safeParse(data);
+    if (!result.success) {
+      console.log("Validation failed:", result.error);
+      return;
+    }
+    
+    console.log("Validation passed, submitting...");
     createPostMutation.mutate(data);
   };
 
@@ -125,7 +136,7 @@ export default function CreatePostPage() {
                 <p className="text-neutral-dark mb-6">
                   You need to be logged in to create a post.
                 </p>
-                <Link href="/auth?redirect=/submit">
+                <Link href="/auth?redirect=/create-post">
                   <Button className="bg-primary hover:bg-primary-hover text-white">
                     Log In
                   </Button>
