@@ -32,19 +32,26 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!postId) return;
 
+    let missedEvent = false;
+
     const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
-      console.log("Received new-comment event:", data);
+      console.log("[Socket] Received new-comment event:", data);
       if (data.postId === parseInt(postId)) {
-        // Update comments cache directly for instant appearance
+        let updated = false;
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
-          if (!oldComments) return [data.comment];
+          if (!oldComments) {
+            updated = true;
+            return [data.comment];
+          }
           // Check if comment already exists to avoid duplicates
           const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
           if (commentExists) return oldComments;
+          updated = true;
           // Add new comment at the beginning for immediate visibility
           return [data.comment, ...oldComments];
         });
-        
+        // If update did not happen, mark as missed
+        if (!updated) missedEvent = true;
         // Update post comment count
         queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
           if (!oldPost) return oldPost;
@@ -54,24 +61,26 @@ export default function PostDetailPage() {
     };
 
     const handleCommentVote = (data: { commentId: number; postId: number; upvotes: number; downvotes: number }) => {
-      console.log("Received comment-vote event:", data);
+      console.log("[Socket] Received comment-vote event:", data);
       if (data.postId === parseInt(postId)) {
-        // Update comments cache with new vote counts
+        let updated = false;
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], (oldComments: any) => {
           if (!oldComments) return oldComments;
-          return oldComments.map((comment: Comment & { author?: User }) => 
-            comment.id === data.commentId 
+          const newComments = oldComments.map((comment: Comment & { author?: User }) =>
+            comment.id === data.commentId
               ? { ...comment, upvotes: data.upvotes, downvotes: data.downvotes }
               : comment
           );
+          updated = true;
+          return newComments;
         });
+        if (!updated) missedEvent = true;
       }
     };
 
     const handlePostVote = (data: { postId: number; upvotes: number; downvotes: number }) => {
-      console.log("Received post-vote event:", data);
+      console.log("[Socket] Received post-vote event:", data);
       if (data.postId === parseInt(postId)) {
-        // Update post cache with new vote counts
         queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
           if (!oldPost) return oldPost;
           return { ...oldPost, upvotes: data.upvotes, downvotes: data.downvotes };
@@ -79,14 +88,40 @@ export default function PostDetailPage() {
       }
     };
 
+    // Connection and error handling
+    const handleConnect = () => {
+      console.log("[Socket] Connected:", socket.id);
+    };
+    const handleDisconnect = (reason: string) => {
+      console.warn("[Socket] Disconnected:", reason);
+    };
+    const handleConnectError = (error: any) => {
+      console.error("[Socket] Connection error:", error);
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
     socket.on("new-comment", handleNewComment);
     socket.on("comment-vote", handleCommentVote);
     socket.on("post-vote", handlePostVote);
 
+    // Fallback: refetch comments if a real-time event was missed
+    const fallbackTimeout = setTimeout(() => {
+      if (missedEvent) {
+        console.warn("[Socket] Missed a real-time event, refetching comments...");
+        queryClient.invalidateQueries({ queryKey: [`/api/posts/${postId}/comments`] });
+      }
+    }, 2000);
+
     return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
       socket.off("new-comment", handleNewComment);
       socket.off("comment-vote", handleCommentVote);
       socket.off("post-vote", handlePostVote);
+      clearTimeout(fallbackTimeout);
     };
   }, [postId, commentSort]);
 
