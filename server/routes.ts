@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify password
-      const isValidPassword = await comparePasswords(password, user.password);
+      const isValidPassword = await comparePasswords(password, user.password || '');
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For premium users: AI-enhanced commenting workflow
       try {
-        const moderationResult = await moderateComment(validatedData.content, post.title);
+        const moderationResult = await moderateComment(validatedData.content, post?.title || '');
         
         // Create comment with AI analysis
         const comment = await storage.createComment({
@@ -570,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "approved", // Always approve for immediate display
           aiPrompt: moderationResult.aiPrompt,
           aiResponse: moderationResult.reason,
-          enhancedContent: moderationResult.enhancedContent || null,
+          enhancedContent: null,
           processFlowsGenerated: false
         });
         
@@ -676,7 +676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // For standard plan users, check remaining prompts
-      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
+      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === null || user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
         return res.status(403).json({ message: "You have used all your AI prompts for this month" });
       }
       
