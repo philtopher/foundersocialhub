@@ -259,6 +259,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: "admin"
       });
       
+      // Broadcast new community to all connected clients for real-time updates
+      io.emit('communityCreated', community);
+      
       res.status(201).json(community);
     } catch (error) {
       if (error instanceof z.ZodError) {

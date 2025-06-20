@@ -20,8 +20,12 @@ import NotificationsPage from "@/pages/notifications-page";
 import ExplorePage from "@/pages/explore-page";
 import MyPostsPage from "@/pages/my-posts-page";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { useSocketEvents } from "@/hooks/use-socket-events";
 
 function Router() {
+  // Enable real-time Socket.IO events for instant updates
+  useSocketEvents();
+  
   return (
     <Switch>
       <Route path="/" component={HomePage} />

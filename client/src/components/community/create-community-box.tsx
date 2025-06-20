@@ -56,7 +56,7 @@ export function CreateCommunityBox() {
         bannerUrl: data.bannerUrl || undefined,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (newCommunity) => {
       toast({
         title: "Community created",
         description: "Your community has been created successfully.",
@@ -66,10 +66,20 @@ export function CreateCommunityBox() {
       form.reset();
       setIsOpen(false);
       
-      // Invalidate queries to refresh the communities list
-      queryClient.invalidateQueries({ queryKey: ["/api/communities"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/communities/trending"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/communities"] });
+      // Immediately update cache for instant feedback
+      queryClient.setQueryData(["/api/communities"], (old: any) => {
+        return old ? [...old, newCommunity] : [newCommunity];
+      });
+      
+      queryClient.setQueryData(["/api/user/communities"], (old: any) => {
+        const communityWithRole = { ...newCommunity, role: "admin" };
+        return old ? [...old, communityWithRole] : [communityWithRole];
+      });
+      
+      // Refetch to ensure consistency
+      await queryClient.refetchQueries({ queryKey: ["/api/communities"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/communities/trending"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/user/communities"] });
     },
     onError: (error) => {
       toast({
