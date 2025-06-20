@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Community } from "@shared/schema";
-import { Home, TrendingUp, Clock, Bookmark, Users, Settings, Flame } from "lucide-react";
+import { Home, TrendingUp, Clock, Bookmark, Users, Settings, Flame, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function LeftSidebar() {
@@ -62,6 +62,11 @@ export function LeftSidebar() {
       <div className="bg-white rounded-lg border border-border p-4">
         <h3 className="font-bold text-lg mb-3">Quick Links</h3>
         <ul className="space-y-2">
+          <li>
+            <Link href="/submit" className="text-foreground hover:text-primary flex items-center">
+              <Plus className="h-4 w-4 mr-2" /> Create Post
+            </Link>
+          </li>
           <li>
             <Link href="/" className="text-foreground hover:text-primary flex items-center">
               <Flame className="h-4 w-4 mr-2" /> Popular Posts
