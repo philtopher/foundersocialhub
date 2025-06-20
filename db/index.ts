@@ -14,13 +14,20 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configure connection pool with proper settings
+// Configure connection pool with increased timeout and retry settings
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: true,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  max: 5,
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 10000,
+  maxUses: 7500,
+  allowExitOnIdle: false,
+});
+
+// Add connection error handling
+pool.on('error', (err) => {
+  console.error('Database pool error:', err);
 });
 
 export const db = drizzle({ client: pool, schema });
