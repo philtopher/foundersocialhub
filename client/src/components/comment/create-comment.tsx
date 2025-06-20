@@ -53,10 +53,18 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
     },
     onSuccess: (newComment) => {
       reset();
-      // Optimistically update the comments list without full refetch
-      queryClient.setQueryData([`/api/posts/${postId}/comments`], (oldComments: any) => {
+      // Optimistically update the comments list for all sort orders
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], (oldComments: any) => {
         if (!oldComments) return [newComment];
         return [newComment, ...oldComments];
+      });
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], (oldComments: any) => {
+        if (!oldComments) return [newComment];
+        return [newComment, ...oldComments];
+      });
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "old" }], (oldComments: any) => {
+        if (!oldComments) return [newComment];
+        return [...oldComments, newComment];
       });
       // Update post comment count
       queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
@@ -82,8 +90,9 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
   });
 
   const onSubmit = (data: CommentFormValues, event?: React.BaseSyntheticEvent) => {
-    if (event) event.preventDefault();
-    console.log("Submitting comment via SPA, should not reload page");
+    event?.preventDefault();
+    event?.stopPropagation();
+    
     if (!user) {
       toast({
         title: "Login Required",
@@ -92,6 +101,7 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       });
       return;
     }
+    
     commentMutation.mutate(data);
   };
 
