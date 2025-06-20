@@ -757,7 +757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // For standard plan users, check remaining prompts
-      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
+      if (user.subscriptionPlan === "standard" && (user.remainingPrompts === null || user.remainingPrompts === undefined || user.remainingPrompts <= 0)) {
         return res.status(403).json({ message: "You have used all your AI prompts for this month" });
       }
       

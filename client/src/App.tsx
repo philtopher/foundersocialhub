@@ -39,8 +39,8 @@ function Router() {
       <ProtectedRoute path="/create-post" component={CreatePostPage} />
       <ProtectedRoute path="/profile" component={UserProfilePage} />
       <ProtectedRoute path="/my-posts" component={MyPostsPage} />
-      <ProtectedRoute path="/notifications" component={() => <NotificationsPage />} />
-      <ProtectedRoute path="/explore" component={() => <ExplorePage />} />
+      <ProtectedRoute path="/notifications" component={NotificationsPage} />
+      <ProtectedRoute path="/explore" component={ExplorePage} />
       <Route path="/u/:username" component={UserProfilePage} />
       <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
       <Route path="/:communityName/post/:postId" component={PostDetailPage} />
