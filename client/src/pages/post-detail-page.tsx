@@ -38,40 +38,48 @@ export default function PostDetailPage() {
     const handleNewComment = (data: { postId: number; comment: Comment & { author?: User }; commentCount: number }) => {
       console.log("[Socket] Received new-comment event:", data);
       if (data.postId === parseInt(postId)) {
-        // Update all possible sort variations immediately
+        // Facebook-style real-time update: only add if not already present
         const updateFn = (oldComments: any) => {
           if (!oldComments) return [data.comment];
-          // Check if comment already exists to avoid duplicates
-          const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
-          if (commentExists) return oldComments;
+          
+          // Check if comment already exists (including optimistic ones)
+          const commentExists = oldComments.some((c: any) => 
+            c.id === data.comment.id || 
+            (c.isOptimistic && c.content === data.comment.content)
+          );
+          
+          if (commentExists) {
+            // Replace optimistic comment with real one, or skip if already exists
+            return oldComments.map((c: any) => 
+              (c.isOptimistic && c.content === data.comment.content) ? data.comment : c
+            );
+          }
+          
           // Add new comment at the beginning for immediate visibility
           return [data.comment, ...oldComments];
         };
 
-        // Update all sort order caches
+        // Update all sort order caches instantly
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], updateFn);
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], updateFn);
         queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "old" }], (oldComments: any) => {
           if (!oldComments) return [data.comment];
-          const commentExists = oldComments.some((c: Comment) => c.id === data.comment.id);
-          if (commentExists) return oldComments;
+          const commentExists = oldComments.some((c: any) => 
+            c.id === data.comment.id || 
+            (c.isOptimistic && c.content === data.comment.content)
+          );
+          if (commentExists) {
+            return oldComments.map((c: any) => 
+              (c.isOptimistic && c.content === data.comment.content) ? data.comment : c
+            );
+          }
           return [...oldComments, data.comment];
         });
         
-        // Update the current sort as well
-        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: commentSort }], updateFn);
-        
-        // Update post comment count
+        // Update post comment count immediately
         queryClient.setQueryData([`/api/posts/${postId}`], (oldPost: any) => {
           if (!oldPost) return oldPost;
           return { ...oldPost, commentCount: data.commentCount };
-        });
-        
-        // Force UI re-render
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/posts/${postId}/comments`],
-          exact: false,
-          refetchType: 'active'
         });
       }
     };
@@ -248,7 +256,7 @@ export default function PostDetailPage() {
               ) : comments && comments.length > 0 ? (
                 <div className="space-y-4">
                   {comments.map(comment => (
-                    <div key={comment.id} className="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                    <div key={comment.id} className={`border-b border-gray-200 pb-4 mb-4 last:border-b-0 ${(comment as any).isOptimistic ? 'opacity-70' : ''}`}>
                       <div className="flex space-x-3">
                         <Avatar className="w-8 h-8">
                           <AvatarImage src={comment.author?.avatarUrl || ""} alt={comment.author?.username || "User"} />
@@ -260,20 +268,23 @@ export default function PostDetailPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold text-sm">{comment.author?.displayName || comment.author?.username}</span>
                             <span className="text-xs text-gray-500">
-                              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                              {(comment as any).isOptimistic ? "Posting..." : formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                             </span>
+                            {(comment as any).isOptimistic && (
+                              <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                            )}
                           </div>
                           <p className="text-sm text-gray-800 mb-2">{comment.content}</p>
                           <div className="flex items-center gap-4 text-xs">
-                            <button className="flex items-center gap-1 text-gray-500 hover:text-blue-600">
+                            <button className="flex items-center gap-1 text-gray-500 hover:text-blue-600" disabled={(comment as any).isOptimistic}>
                               <ThumbsUp className="w-4 h-4" />
                               {comment.upvotes || 0}
                             </button>
-                            <button className="flex items-center gap-1 text-gray-500 hover:text-red-600">
+                            <button className="flex items-center gap-1 text-gray-500 hover:text-red-600" disabled={(comment as any).isOptimistic}>
                               <ThumbsDown className="w-4 h-4" />
                               {comment.downvotes || 0}
                             </button>
-                            <button className="text-gray-500 hover:text-blue-600">Reply</button>
+                            <button className="text-gray-500 hover:text-blue-600" disabled={(comment as any).isOptimistic}>Reply</button>
                           </div>
                         </div>
                       </div>

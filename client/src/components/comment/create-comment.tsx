@@ -48,35 +48,60 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
       });
       return await response.json();
     },
-    onMutate: () => {
+    onMutate: async (data: CommentFormValues) => {
       setIsSubmitting(true);
-    },
-    onSuccess: (newComment) => {
-      reset();
-      // Immediately update all possible comment query variations
-      const updateFn = (oldComments: any) => {
-        if (!oldComments) return [newComment];
-        // Check if comment already exists to avoid duplicates
-        const exists = oldComments.some((c: any) => c.id === newComment.id);
-        if (exists) return oldComments;
-        return [newComment, ...oldComments];
+      
+      // Create optimistic comment for instant display (Facebook-style)
+      const optimisticComment = {
+        id: Date.now(), // Temporary ID
+        content: data.content,
+        authorId: user?.id,
+        postId: postId,
+        parentId: parentId || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        upvotes: 0,
+        downvotes: 0,
+        replyCount: 0,
+        status: "approved",
+        author: user,
+        isOptimistic: true // Flag to identify optimistic updates
       };
-      
-      // Update all sort variations
-      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], updateFn);
-      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], updateFn);
-      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "old" }], (oldComments: any) => {
-        if (!oldComments) return [newComment];
-        const exists = oldComments.some((c: any) => c.id === newComment.id);
-        if (exists) return oldComments;
-        return [...oldComments, newComment];
+
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: [`/api/posts/${postId}/comments`] });
+
+      // Snapshot the previous value
+      const previousComments = queryClient.getQueryData([`/api/posts/${postId}/comments`, { sort: "top" }]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], (old: any) => {
+        return old ? [optimisticComment, ...old] : [optimisticComment];
       });
-      
-      // Force refetch to ensure UI updates
-      queryClient.invalidateQueries({ 
-        queryKey: [`/api/posts/${postId}/comments`],
-        exact: false,
-        refetchType: 'active'
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], (old: any) => {
+        return old ? [optimisticComment, ...old] : [optimisticComment];
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousComments, optimisticComment };
+    },
+    onSuccess: (newComment, variables, context) => {
+      // Replace optimistic comment with real comment
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], (old: any) => {
+        if (!old) return [newComment];
+        return old.map((comment: any) => 
+          comment.isOptimistic && comment.content === newComment.content 
+            ? newComment 
+            : comment
+        );
+      });
+      queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], (old: any) => {
+        if (!old) return [newComment];
+        return old.map((comment: any) => 
+          comment.isOptimistic && comment.content === newComment.content 
+            ? newComment 
+            : comment
+        );
       });
       
       // Update post comment count
@@ -85,13 +110,15 @@ export function CreateComment({ postId, parentId, onSuccess }: CreateCommentProp
         return { ...oldPost, commentCount: (oldPost.commentCount || 0) + 1 };
       });
       
+      reset();
       if (onSuccess) onSuccess();
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been added successfully",
-      });
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousComments) {
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "top" }], context.previousComments);
+        queryClient.setQueryData([`/api/posts/${postId}/comments`, { sort: "new" }], context.previousComments);
+      }
       toast({
         title: "Error",
         description: `Failed to submit comment: ${error.message}`,
