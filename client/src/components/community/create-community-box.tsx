@@ -18,7 +18,8 @@ const communitySchema = z.object({
   name: z.string()
     .min(3, "Name must be at least 3 characters")
     .max(25, "Name cannot exceed 25 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Name can only contain letters, numbers, and underscores"),
+    .regex(/^[a-zA-Z0-9_ ]+$/, "Name can only contain letters, numbers, underscores, and spaces")
+    .transform((val) => val.replace(/\s+/g, '_').toLowerCase()),
   displayName: z.string()
     .min(3, "Display name must be at least 3 characters")
     .max(50, "Display name cannot exceed 50 characters"),
