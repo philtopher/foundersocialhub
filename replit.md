@@ -139,6 +139,7 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 
 ```
 Changelog:
+- June 20, 2025. Upgraded OpenAI integration from GPT-4o to GPT-4.1 and enabled test premium user for AI feature testing
 - June 20, 2025. Successfully implemented Facebook-style instant comment system with optimistic rendering, real-time Socket.IO updates, and seamless user experience
 - June 20, 2025. Fixed user registration form feedback - improved loading states, error handling, and form reset after successful registration
 - June 18, 2025. Initial setup
