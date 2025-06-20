@@ -14,7 +14,7 @@ export function CreatePostBox({ communityId }: { communityId?: number }) {
     if (communityId) {
       navigate(`/r/${communityId}/submit`);
     } else {
-      navigate("/submit");
+      navigate("/create-post");
     }
   };
   
