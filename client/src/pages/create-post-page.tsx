@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,7 +77,9 @@ export default function CreatePostPage() {
 
   const createPostMutation = useMutation({
     mutationFn: async (data: PostFormValues) => {
+      console.log("Creating post with data:", data);
       const communityId = parseInt(data.communityId);
+      console.log("Parsed community ID:", communityId);
       return await apiRequest("POST", `/api/communities/${communityId}/posts`, {
         title: data.title,
         content: data.content,
@@ -105,6 +107,8 @@ export default function CreatePostPage() {
   });
 
   const onSubmit = (data: PostFormValues) => {
+    console.log("Form submission data:", data);
+    console.log("Form errors:", form.formState.errors);
     createPostMutation.mutate(data);
   };
 
