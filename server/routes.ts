@@ -234,16 +234,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/communities", isAuthenticated, async (req, res) => {
     try {
+      // Get user ID based on auth type
+      let userId;
+      if (req.user && typeof req.user === 'object' && 'claims' in req.user) {
+        userId = (req.user as any).claims.sub;
+      } else {
+        userId = (req.user as any).id;
+      }
+      
       const validatedData = insertCommunitySchema.parse({
         ...req.body,
-        creatorId: req.user!.id
+        creatorId: userId
       });
       
       const community = await storage.createCommunity(validatedData);
       
       // Add creator as admin member
       await storage.addCommunityMember({
-        userId: req.user!.id,
+        userId: userId,
         communityId: community.id,
         role: "admin"
       });
@@ -383,8 +391,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Community not found" });
       }
       
+      // Get user ID based on auth type
+      let userId;
+      if (req.user && typeof req.user === 'object' && 'claims' in req.user) {
+        userId = (req.user as any).claims.sub;
+      } else {
+        userId = (req.user as any).id;
+      }
+      
       // Check if user is a member of the community
-      const membership = await storage.getCommunityMembership(Number(req.user!.id), communityId);
+      const membership = await storage.getCommunityMembership(Number(userId), communityId);
       if (!membership && community.visibility !== "public") {
         return res.status(403).json({ message: "You must be a member to post in this community" });
       }
@@ -394,7 +410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertPostSchema.parse({
         ...req.body,
-        authorId: Number(req.user!.id),
+        authorId: Number(userId),
         communityId,
         slug: `${slug}-${Date.now()}`
       });
