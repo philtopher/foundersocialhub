@@ -28,7 +28,7 @@ export default function ExplorePage() {
 
   const filteredCommunities = communities?.filter(community =>
     community.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    community.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (community.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -145,7 +145,7 @@ export default function ExplorePage() {
                     className="p-4 bg-white rounded-lg border border-border"
                   >
                     <Link
-                      href={`/${post.communityName}/post/${post.id}`}
+                      href={`/post/${post.id}`}
                       className="block hover:text-primary"
                     >
                       <h3 className="font-bold text-lg mb-2">{post.title}</h3>
@@ -153,9 +153,9 @@ export default function ExplorePage() {
                         {post.content}
                       </p>
                       <div className="flex items-center text-sm text-muted-foreground">
-                        <span>by {post.authorUsername}</span>
+                        <span>by user {post.authorId}</span>
                         <span className="mx-2">•</span>
-                        <span>in {post.communityName}</span>
+                        <span>in community {post.communityId}</span>
                         <span className="mx-2">•</span>
                         <span>{post.upvotes} upvotes</span>
                         <span className="mx-2">•</span>

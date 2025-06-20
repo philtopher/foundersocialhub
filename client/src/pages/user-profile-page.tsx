@@ -169,7 +169,7 @@ export default function UserProfilePage() {
                 ) : posts && posts.length > 0 ? (
                   <div className="space-y-4">
                     {posts.map(post => (
-                      <PostCard key={post.id} post={{...post, author: user}} />
+                      <PostCard key={post.id} post={{...post, author: user as any}} />
                     ))}
                   </div>
                 ) : (
@@ -198,15 +198,14 @@ export default function UserProfilePage() {
                         <p className="text-xs text-neutral mb-2">
                           On post:{' '}
                           <a 
-                            href={`/r/${comment.post?.community?.name}/post/${comment.postId}`}
+                            href={`/post/${comment.postId}`}
                             className="hover:underline text-secondary"
                           >
-                            {comment.post?.title || `Post #${comment.postId}`}
+                            Post #{comment.postId}
                           </a>
                         </p>
                         <CommentItem 
-                          comment={{...comment, author: user}}
-                          postId={comment.postId}
+                          comment={{...comment, author: {...user, password: ''} as any}}
                         />
                       </div>
                     ))}
