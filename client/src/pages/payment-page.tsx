@@ -119,14 +119,38 @@ export default function PaymentPage() {
           <LeftSidebar />
           <div className="flex-1 max-w-6xl mx-auto px-4 py-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-4">Upgrade to Premium</h1>
+              <h1 className="text-3xl font-bold mb-4">
+                {user?.subscriptionPlan === "standard" 
+                  ? "Upgrade to Founder Plan" 
+                  : user?.subscriptionPlan === "founder"
+                  ? "You're on the Founder Plan"
+                  : "Upgrade to Premium"
+                }
+              </h1>
               <p className="text-neutral-dark text-lg max-w-2xl mx-auto">
-                Unlock advanced features and take your founder journey to the next level
+                {user?.subscriptionPlan === "founder"
+                  ? "You have access to all premium features. Manage your subscription in account settings."
+                  : "Unlock advanced features and take your founder journey to the next level"
+                }
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {plans.map((plan) => (
+              {plans
+                .filter((plan) => {
+                  // Show plans based on user's current subscription
+                  if (!user || !user.subscriptionPlan || user.subscriptionPlan === "free") {
+                    return true; // Show all plans for free users
+                  }
+                  if (user.subscriptionPlan === "standard") {
+                    return plan.id === "founder"; // Only show Founder plan for Standard users
+                  }
+                  if (user.subscriptionPlan === "founder") {
+                    return false; // Show no plans for Founder users (they have the highest tier)
+                  }
+                  return true;
+                })
+                .map((plan) => (
                 <Card
                   key={plan.id}
                   className={`relative ${
@@ -165,18 +189,18 @@ export default function PaymentPage() {
                       <Button
                         className="w-full"
                         onClick={() => handleStripeCheckout(plan.id as "standard" | "founder")}
-                        disabled={createStripeSubscriptionMutation.isPending}
+                        disabled={createStripeSubscriptionMutation.isPending || user?.subscriptionPlan === plan.id}
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Pay with Stripe
+                        {user?.subscriptionPlan === plan.id ? "Current Plan" : "Pay with Stripe"}
                       </Button>
                       <Button
                         variant="outline"
                         className="w-full"
                         onClick={() => handlePaypalCheckout(plan.id as "standard" | "founder")}
-                        disabled={createPaypalSubscriptionMutation.isPending}
+                        disabled={createPaypalSubscriptionMutation.isPending || user?.subscriptionPlan === plan.id}
                       >
-                        Pay with PayPal
+                        {user?.subscriptionPlan === plan.id ? "Current Plan" : "Pay with PayPal"}
                       </Button>
                     </div>
                   </CardContent>
@@ -184,15 +208,31 @@ export default function PaymentPage() {
               ))}
             </div>
 
-            <div className="text-center text-sm text-neutral">
-              <p>All plans include a 7-day free trial. Cancel anytime.</p>
-              <p className="mt-2">
-                Questions? Contact us at{" "}
-                <a href="mailto:support@foundersocials.com" className="text-primary hover:underline">
-                  support@foundersocials.com
-                </a>
-              </p>
-            </div>
+            {user?.subscriptionPlan === "founder" && (
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium mb-2">You're all set!</h3>
+                <p className="text-neutral">You have access to all premium features.</p>
+                <p className="text-sm text-neutral mt-4">
+                  To manage your subscription or billing, visit your{" "}
+                  <Link href="/settings" className="text-primary hover:underline">
+                    account settings
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+
+            {user?.subscriptionPlan !== "founder" && (
+              <div className="text-center text-sm text-neutral">
+                <p>All plans include a 7-day free trial. Cancel anytime.</p>
+                <p className="mt-2">
+                  Questions? Contact us at{" "}
+                  <a href="mailto:support@foundersocials.com" className="text-primary hover:underline">
+                    support@foundersocials.com
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
           <RightSidebar />
         </div>
