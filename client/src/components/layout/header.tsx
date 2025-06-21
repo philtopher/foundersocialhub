@@ -234,6 +234,10 @@ export function Header() {
               </Link>
               {user && (
                 <>
+                  {/* Debug: Show user subscription plan */}
+                  <div className="text-xs text-neutral p-2 bg-gray-100 rounded mb-2">
+                    User: {user.username} | Plan: {user.subscriptionPlan || "null"}
+                  </div>
                   <Link href="/notifications" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
                     <Bell size={18} />
                     <span>Notifications</span>
@@ -260,19 +264,22 @@ export function Header() {
                       <span>TaskFlowPro</span>
                     </Link>
                   )}
-                  {(!user.subscriptionPlan || user.subscriptionPlan === "free") && (
-                    <Link href="/payment" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-primary">
-                      <Star size={18} />
-                      <span>Upgrade</span>
-                    </Link>
-                  )}
+                  {/* Always show Upgrade link for testing */}
+                  <Link href="/payment" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-primary">
+                    <Star size={18} />
+                    <span>Upgrade to Premium</span>
+                  </Link>
                   <hr className="my-2 border-light-border" />
                   <button 
-                    onClick={() => logoutMutation.mutate()} 
+                    onClick={() => {
+                      logoutMutation.mutate();
+                      setMobileMenuOpen(false);
+                    }} 
                     className="w-full flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-destructive"
+                    disabled={logoutMutation.isPending}
                   >
                     <LogOut size={18} />
-                    <span>Log Out</span>
+                    <span>{logoutMutation.isPending ? "Logging out..." : "Log Out"}</span>
                   </button>
                 </>
               )}
