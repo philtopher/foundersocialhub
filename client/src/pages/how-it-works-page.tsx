@@ -4,22 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { 
   Users, 
-  Clock, 
-  Sparkles, 
-  Kanban, 
-  BadgeCheck, 
-  MessageSquare, 
-  ListChecks, 
-  PenLine,
-  ArrowRight,
   Bot,
+  MessageSquare,
   Search,
   HelpCircle,
   Lightbulb,
-  Zap
-  Settings,
-  CreditCard,
-  Shield
+  Zap,
+  Kanban
 } from "lucide-react";
 
 export default function HowItWorksPage() {
@@ -306,7 +297,9 @@ export default function HowItWorksPage() {
                     <li>✓ 3 AI prompts/month</li>
                     <li>✓ Premium communities</li>
                   </ul>
-                  <Button className="w-full">Upgrade Now</Button>
+                  <Link href="/payment">
+                    <Button className="w-full">Upgrade Now</Button>
+                  </Link>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg border border-light-border text-center">
@@ -320,7 +313,9 @@ export default function HowItWorksPage() {
                     <li>✓ Founder badge</li>
                     <li>✓ Priority support</li>
                   </ul>
-                  <Button className="w-full">Go Pro</Button>
+                  <Link href="/payment">
+                    <Button className="w-full">Go Pro</Button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -352,223 +347,6 @@ export default function HowItWorksPage() {
                 <h3 className="font-bold mb-2">Is there a free trial?</h3>
                 <p className="text-neutral-dark">All paid plans include a 7-day free trial. No charges until the trial ends.</p>
               </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </>
-  );
-}
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Join and create communities</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Create and reply to posts</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Standard commenting</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-neutral">
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span>AI features</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-neutral">
-                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span>Project management tools</span>
-                  </li>
-                </ul>
-                
-                <Link href="/auth">
-                  <Button variant="outline" className="w-full rounded-full border-primary text-primary">Sign Up Free</Button>
-                </Link>
-              </div>
-              
-              {/* Standard Plan */}
-              <div className="bg-white rounded-xl border-2 border-primary p-6 flex flex-col relative">
-                <div className="absolute -top-4 left-0 right-0 text-center">
-                  <span className="bg-primary text-white text-sm font-semibold py-1 px-4 rounded-full">Most Popular</span>
-                </div>
-                
-                <h3 className="text-xl font-bold mb-2">Standard Plan</h3>
-                <div className="text-3xl font-bold mb-4">£7 <span className="text-sm font-normal text-neutral">/month</span></div>
-                <p className="text-neutral-dark mb-6">Enhanced collaboration with AI assistance and project tools.</p>
-                
-                <ul className="space-y-3 mb-8 flex-grow">
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Everything in Free Plan</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>AI-enhanced commenting (3 prompts/day)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Process flow generation</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>TaskFlowPro access</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Collaboration with Standard/Founder users</span>
-                  </li>
-                </ul>
-                
-                <Link href="/payment">
-                  <Button className="w-full rounded-full">Choose Standard</Button>
-                </Link>
-              </div>
-              
-              {/* Founder Plan */}
-              <div className="bg-white rounded-xl border border-light-border p-6 flex flex-col">
-                <h3 className="text-xl font-bold mb-2">Founder Plan</h3>
-                <div className="text-3xl font-bold mb-4">£15 <span className="text-sm font-normal text-neutral">/month</span></div>
-                <p className="text-neutral-dark mb-6">Full access to all AI features and unlimited collaboration.</p>
-                
-                <ul className="space-y-3 mb-8 flex-grow">
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Everything in Standard Plan</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Enhanced AI features (10 prompts/day)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Collaboration with all user types</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Priority support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Advanced project management</span>
-                  </li>
-                </ul>
-                
-                <Link href="/payment">
-                  <Button variant="outline" className="w-full rounded-full border-primary text-primary">Choose Founder</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Settings & Account Management */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Account Management & Settings</h2>
-            
-            <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-              <div>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Settings className="text-primary" />
-                  Profile & Preferences
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Upload profile pictures and customize your display</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Configure AI comment settings (direct or workflow mode)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Manage notification preferences</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Set collaboration preferences</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <CreditCard className="text-primary" />
-                  Subscription Management
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Upgrade or downgrade your plan anytime</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>View prompt usage and reset schedules</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Cancel subscription or delete account</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                    <span>Access TaskFlowPro integration</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Call to Action */}
-        <section className="py-16 bg-gradient-to-r from-primary to-primary-dark">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Ready to Transform Your Founder Journey?</h2>
-            <p className="text-xl text-primary-light mb-8 max-w-2xl mx-auto">
-              Join FounderSocials today and start building meaningful connections with AI-enhanced collaboration tools.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth">
-                <Button size="lg" variant="secondary" className="rounded-full px-8 py-6 text-lg font-semibold">
-                  Start Your Journey
-                </Button>
-              </Link>
-              <Link href="/payment">
-                <Button size="lg" variant="outline" className="rounded-full px-8 py-6 text-lg font-semibold border-white text-white hover:bg-white hover:text-primary">
-                  View Pricing
-                </Button>
-              </Link>
             </div>
           </div>
         </section>
