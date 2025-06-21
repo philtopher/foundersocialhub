@@ -230,7 +230,7 @@ export function Header() {
               </Link>
               <Link href="/how-it-works" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
                 <HelpCircle size={18} />
-                <span>How It Works</span>
+                <span>Guide</span>
               </Link>
               {user && (
                 <>
@@ -273,6 +273,27 @@ export function Header() {
                       <span>Upgrade to Founder Plan</span>
                     </Link>
                   )}
+                  
+                  <hr className="my-2 border-light-border" />
+                  
+                  {/* Additional Links */}
+                  <div className="space-y-1">
+                    <div className="text-xs uppercase tracking-wide text-neutral font-semibold px-3 py-1">
+                      Resources
+                    </div>
+                    <a href="mailto:support@foundersocials.com" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                      <MessageSquare size={18} />
+                      <span>Support</span>
+                    </a>
+                    <Link href="/privacy" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                      <HelpCircle size={18} />
+                      <span>Privacy</span>
+                    </Link>
+                    <Link href="/terms" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light">
+                      <HelpCircle size={18} />
+                      <span>Terms</span>
+                    </Link>
+                  </div>
                   
                   <hr className="my-2 border-light-border" />
                   
