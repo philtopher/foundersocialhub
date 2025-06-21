@@ -260,13 +260,17 @@ export function Header() {
                       <span>TaskFlowPro</span>
                     </Link>
                   )}
-                  {(!user.subscriptionPlan || user.subscriptionPlan === "free" || user.subscriptionPlan === null) && (
+                  {/* Upgrade to Premium link */}
+                  {(!user.subscriptionPlan || user.subscriptionPlan === "free") && (
                     <Link href="/payment" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-primary">
                       <Star size={18} />
                       <span>Upgrade to Premium</span>
                     </Link>
                   )}
+                  
                   <hr className="my-2 border-light-border" />
+                  
+                  {/* Logout button - always visible for authenticated users */}
                   <button 
                     onClick={() => {
                       logoutMutation.mutate();
