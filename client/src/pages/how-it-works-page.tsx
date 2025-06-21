@@ -13,10 +13,10 @@ import {
   PenLine,
   ArrowRight,
   Bot,
-  Zap,
-  GitBranch,
-  Video,
-  FileText,
+  Search,
+  HelpCircle,
+  Lightbulb,
+  Zap
   Settings,
   CreditCard,
   Shield
@@ -34,7 +34,7 @@ export default function HowItWorksPage() {
               How FounderSocials Works
             </h1>
             <p className="text-xl text-neutral-dark max-w-3xl mx-auto mb-8">
-              A comprehensive guide to understanding how our AI-powered social platform connects founders, enhances collaboration, and accelerates project development
+              Simple AI-powered commenting that turns basic responses into meaningful professional conversations
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth">
@@ -58,9 +58,7 @@ export default function HowItWorksPage() {
             
             <div className="max-w-4xl mx-auto text-center mb-12">
               <p className="text-lg text-neutral-dark leading-relaxed">
-                FounderSocials combines the community-driven aspects of Reddit with the professional networking of LinkedIn 
-                and the publishing capabilities of Medium. Our platform is enhanced with AI-powered collaboration tools 
-                that help founders connect, communicate more effectively, and build projects together.
+                Like Reddit for founders, but with AI that makes every comment more valuable. Join communities, share ideas, and let AI help you communicate better.
               </p>
             </div>
 
@@ -98,188 +96,175 @@ export default function HowItWorksPage() {
           </div>
         </section>
         
-        {/* User Journey Section */}
+        {/* How It Works - Simple Steps */}
         <section className="py-16 bg-light">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Complete User Journey</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">How It Works (3 Simple Steps)</h2>
             
             <div className="max-w-4xl mx-auto">
-              <div className="space-y-8">
-                <div className="flex gap-6">
-                  <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
                     1
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">Registration & Payment</h3>
-                    <p className="text-neutral-dark mb-4">
-                      Sign up with your profile details including username, email, name, address, industry, and preferences. 
-                      Choose your subscription plan and complete payment to access the platform.
-                    </p>
-                    <div className="bg-white p-4 rounded-lg border border-light-border">
-                      <p className="text-sm text-neutral-dark">
-                        <strong>Registration Flow:</strong> Profile Details → Payment → Email Confirmation → Platform Access
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-xl font-bold mb-3">Write Your Comment</h3>
+                  <p className="text-neutral-dark">
+                    Type a normal comment on any post. Don't worry about making it perfect.
+                  </p>
                 </div>
-
-                <div className="flex gap-6">
-                  <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
+                
+                <div className="text-center">
+                  <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
                     2
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">Explore Communities & Posts</h3>
-                    <p className="text-neutral-dark mb-4">
-                      Browse and join communities relevant to your interests. View posts from community members, 
-                      similar to Reddit's feed system but focused on founder collaboration and professional networking.
-                    </p>
-                    <div className="bg-white p-4 rounded-lg border border-light-border">
-                      <p className="text-sm text-neutral-dark">
-                        <strong>Community Types:</strong> Public (anyone can join), Restricted (approval required), Private (invite-only)
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-xl font-bold mb-3">AI Asks Questions</h3>
+                  <p className="text-neutral-dark">
+                    AI asks clarifying questions to understand your point better and help you express it clearly.
+                  </p>
                 </div>
-
-                <div className="flex gap-6">
-                  <div className="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
+                
+                <div className="text-center">
+                  <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
                     3
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">Create Content & Engage</h3>
-                    <p className="text-neutral-dark mb-4">
-                      Share posts with rich formatting options including polls, HTML content, and multimedia. 
-                      Your posts can appear as blog-style articles with SEO-friendly URLs (e.g., platform.com/article-name).
-                    </p>
-                    <div className="bg-white p-4 rounded-lg border border-light-border">
-                      <p className="text-sm text-neutral-dark">
-                        <strong>Publishing Features:</strong> Rich text editor, polls, media uploads, HTML support, blog-style URLs
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-xl font-bold mb-3">Enhanced Comment Posted</h3>
+                  <p className="text-neutral-dark">
+                    Your improved comment gets posted, leading to better discussions and connections.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </section>
         
-        {/* AI Workflow Section */}
+        {/* AI Features Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">AI-Enhanced Comment Workflow</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">AI-Powered Features</h2>
             
             <div className="max-w-4xl mx-auto">
-              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-8 rounded-xl mb-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Bot className="text-primary" />
-                  How Our AI Transforms Simple Comments Into Collaborative Opportunities
-                </h3>
+              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-6 rounded-xl mb-8 text-center">
+                <Bot className="text-primary w-12 h-12 mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">Smart Comments That Build Projects</h3>
                 <p className="text-neutral-dark">
-                  When premium users comment, our AI doesn't just post the comment immediately. Instead, it initiates an 
-                  intelligent workflow that helps clarify intentions, generate actionable insights, and create opportunities 
-                  for deeper collaboration.
+                  AI transforms simple comments into structured collaboration opportunities with enhanced content and follow-up questions.
                 </p>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    1
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg mb-2">Comment Submission & AI Analysis</h4>
-                    <p className="text-neutral-dark mb-3">
-                      When you type a comment, the AI analyzes your content and asks clarifying questions about your intentions and reasoning.
-                    </p>
-                    <div className="bg-light p-4 rounded-lg">
-                      <p className="text-sm text-neutral-dark italic">
-                        "Why did you make this comment? What specific problem are you trying to solve or question are you asking?"
-                      </p>
-                    </div>
-                  </div>
+              {/* Quick Overview */}
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
+                <div className="bg-light p-4 rounded-lg text-center">
+                  <MessageSquare className="text-primary w-8 h-8 mx-auto mb-2" />
+                  <h4 className="font-bold mb-2">Comment Enhancement</h4>
+                  <p className="text-sm text-neutral-dark">AI improves your comments for clarity and impact</p>
                 </div>
-
-                <div className="flex gap-4">
-                  <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    2
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg mb-2">Idea Development & Process Flow Generation</h4>
-                    <p className="text-neutral-dark mb-3">
-                      Based on your response, the AI generates multiple process flow diagrams (similar to Figma or Visio) that visualize your idea or solution.
-                    </p>
-                    <div className="bg-light p-4 rounded-lg">
-                      <p className="text-sm text-neutral-dark">
-                        <strong>AI generates:</strong> 3+ visual workflows, process diagrams, or solution architectures
-                      </p>
-                    </div>
-                  </div>
+                <div className="bg-light p-4 rounded-lg text-center">
+                  <Bot className="text-primary w-8 h-8 mx-auto mb-2" />
+                  <h4 className="font-bold mb-2">Smart Questions</h4>
+                  <p className="text-sm text-neutral-dark">AI asks follow-up questions to deepen discussions</p>
                 </div>
-
-                <div className="flex gap-4">
-                  <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    3
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg mb-2">Collaborative Response</h4>
-                    <p className="text-neutral-dark mb-3">
-                      The original post author sees your workflow suggestion and can respond through the same AI-enhanced process, creating a structured dialogue.
-                    </p>
-                    <div className="bg-light p-4 rounded-lg">
-                      <p className="text-sm text-neutral-dark">
-                        Both parties engage in AI-moderated discussions that focus on solutions and actionable outcomes.
-                      </p>
-                    </div>
-                  </div>
+                <div className="bg-light p-4 rounded-lg text-center">
+                  <Zap className="text-primary w-8 h-8 mx-auto mb-2" />
+                  <h4 className="font-bold mb-2">Process Flows</h4>
+                  <p className="text-sm text-neutral-dark">AI generates workflow diagrams from conversations</p>
                 </div>
+              </div>
 
-                <div className="flex gap-4">
-                  <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    4
+              {/* Use Cases by User Type */}
+              <h3 className="text-2xl font-bold mb-8 text-center">How Different Users Benefit</h3>
+              
+              <div className="space-y-8">
+                {/* Researchers */}
+                <div className="border border-light-border rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-blue-100 p-2 rounded-full">
+                      <Search className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h4 className="text-xl font-bold">For Researchers</h4>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg mb-2">Advanced Collaboration Options</h4>
-                    <p className="text-neutral-dark mb-3">
-                      After initial exchanges, the AI offers enhanced collaboration features:
-                    </p>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="bg-light p-4 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <GitBranch className="w-4 h-4 text-primary" />
-                          <strong className="text-sm">Prototype Generation</strong>
-                        </div>
-                        <p className="text-sm text-neutral-dark">
-                          AI creates working prototypes in a development environment (3 prompts per user)
-                        </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-semibold mb-2">You write:</h5>
+                      <div className="bg-gray-50 p-3 rounded text-sm italic">
+                        "Interesting findings on user behavior"
                       </div>
-                      <div className="bg-light p-4 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Video className="w-4 h-4 text-primary" />
-                          <strong className="text-sm">Live Meetings</strong>
-                        </div>
-                        <p className="text-sm text-neutral-dark">
-                          Automatic video call setup via Zoom, Teams, or Google Meet
-                        </p>
+                    </div>
+                    <div>
+                      <h5 className="font-semibold mb-2">AI enhances to:</h5>
+                      <div className="bg-primary/5 p-3 rounded text-sm">
+                        "These findings on user behavior align with my research on digital engagement patterns. What specific methodologies did you use for data collection? I'd be interested in comparing results with similar studies in the fintech sector."
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <div className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    5
+                {/* Domain Experts */}
+                <div className="border border-light-border rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-green-100 p-2 rounded-full">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h4 className="text-xl font-bold">For Domain Experts</h4>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg mb-2">Project Management Integration</h4>
-                    <p className="text-neutral-dark mb-3">
-                      Conversations can be exported to project management tools and converted into actionable items:
-                    </p>
-                    <div className="bg-light p-4 rounded-lg">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                        <span className="bg-white px-2 py-1 rounded">User Stories</span>
-                        <span className="bg-white px-2 py-1 rounded">Epics</span>
-                        <span className="bg-white px-2 py-1 rounded">Requirements</span>
-                        <span className="bg-white px-2 py-1 rounded">Backlog Items</span>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-semibold mb-2">You write:</h5>
+                      <div className="bg-gray-50 p-3 rounded text-sm italic">
+                        "This won't work in enterprise environments"
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-semibold mb-2">AI enhances to:</h5>
+                      <div className="bg-primary/5 p-3 rounded text-sm">
+                        "Based on my experience with enterprise implementations, this approach faces several challenges: compliance requirements, integration complexity, and scalability concerns. Here's what I'd recommend instead... Have you considered these enterprise-specific factors?"
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Newbies */}
+                <div className="border border-light-border rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-yellow-100 p-2 rounded-full">
+                      <HelpCircle className="w-6 h-6 text-yellow-600" />
+                    </div>
+                    <h4 className="text-xl font-bold">For Newbies</h4>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-semibold mb-2">You write:</h5>
+                      <div className="bg-gray-50 p-3 rounded text-sm italic">
+                        "I'm confused about this"
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-semibold mb-2">AI enhances to:</h5>
+                      <div className="bg-primary/5 p-3 rounded text-sm">
+                        "I'm new to this concept and finding it challenging to understand. Could you break down the key components? Specifically, I'm unclear about how the different parts connect. What would be the best starting point for someone just learning?"
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Founders */}
+                <div className="border border-light-border rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-purple-100 p-2 rounded-full">
+                      <Lightbulb className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <h4 className="text-xl font-bold">For Founders</h4>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-semibold mb-2">You write:</h5>
+                      <div className="bg-gray-50 p-3 rounded text-sm italic">
+                        "We should build this feature"
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-semibold mb-2">AI enhances to:</h5>
+                      <div className="bg-primary/5 p-3 rounded text-sm">
+                        "This feature could significantly impact user engagement. From a product strategy perspective, it aligns with our goal of improving retention. What's the business case? Have we validated user demand? I'd suggest A/B testing the concept first. Happy to share our implementation approach."
                       </div>
                     </div>
                   </div>
@@ -288,23 +273,93 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </section>
-        
+
         {/* Subscription Plans */}
         <section className="py-16 bg-light">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-4">Subscription Plans</h2>
-            <p className="text-center text-neutral-dark mb-12 max-w-2xl mx-auto">
-              Choose the plan that fits your collaboration needs. Each plan offers different levels of AI assistance and project management features.
-            </p>
+            <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
             
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {/* Free Plan */}
-              <div className="bg-white rounded-xl border border-light-border p-6 flex flex-col">
-                <h3 className="text-xl font-bold mb-2">Free Plan</h3>
-                <div className="text-3xl font-bold mb-4">£0 <span className="text-sm font-normal text-neutral">/month</span></div>
-                <p className="text-neutral-dark mb-6">Basic community access and standard posting features.</p>
+            <div className="max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-lg border border-light-border text-center">
+                  <h3 className="text-xl font-bold mb-2">Free</h3>
+                  <p className="text-3xl font-bold mb-4">£0</p>
+                  <ul className="text-sm text-left space-y-2 mb-6">
+                    <li>✓ Browse communities</li>
+                    <li>✓ Create posts</li>
+                    <li>✓ Basic commenting</li>
+                    <li>✗ AI features</li>
+                  </ul>
+                  <Button variant="outline" className="w-full">Current Plan</Button>
+                </div>
                 
-                <ul className="space-y-3 mb-8 flex-grow">
+                <div className="bg-white p-6 rounded-lg border-2 border-primary text-center relative">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm">
+                    Most Popular
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Standard</h3>
+                  <p className="text-3xl font-bold mb-4">£3<span className="text-sm">/month</span></p>
+                  <ul className="text-sm text-left space-y-2 mb-6">
+                    <li>✓ Everything in Free</li>
+                    <li>✓ AI comment enhancement</li>
+                    <li>✓ Smart follow-up questions</li>
+                    <li>✓ 3 AI prompts/month</li>
+                    <li>✓ Premium communities</li>
+                  </ul>
+                  <Button className="w-full">Upgrade Now</Button>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg border border-light-border text-center">
+                  <h3 className="text-xl font-bold mb-2">Founder</h3>
+                  <p className="text-3xl font-bold mb-4">£7<span className="text-sm">/month</span></p>
+                  <ul className="text-sm text-left space-y-2 mb-6">
+                    <li>✓ Everything in Standard</li>
+                    <li>✓ Unlimited AI prompts</li>
+                    <li>✓ Process flow generation</li>
+                    <li>✓ Direct posting option</li>
+                    <li>✓ Founder badge</li>
+                    <li>✓ Priority support</li>
+                  </ul>
+                  <Button className="w-full">Go Pro</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Simple FAQ */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Quick Questions</h2>
+            
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="border border-light-border rounded-lg p-6">
+                <h3 className="font-bold mb-2">How does AI commenting work?</h3>
+                <p className="text-neutral-dark">Type your comment → AI asks clarifying questions → You respond → Enhanced comment gets posted with better engagement potential.</p>
+              </div>
+              
+              <div className="border border-light-border rounded-lg p-6">
+                <h3 className="font-bold mb-2">What happens to my data?</h3>
+                <p className="text-neutral-dark">Your conversations help improve AI responses but are never shared publicly. You control privacy settings in your account.</p>
+              </div>
+              
+              <div className="border border-light-border rounded-lg p-6">
+                <h3 className="font-bold mb-2">Can I cancel anytime?</h3>
+                <p className="text-neutral-dark">Yes, cancel anytime from your settings. You keep access until your billing period ends.</p>
+              </div>
+              
+              <div className="border border-light-border rounded-lg p-6">
+                <h3 className="font-bold mb-2">Is there a free trial?</h3>
+                <p className="text-neutral-dark">All paid plans include a 7-day free trial. No charges until the trial ends.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
                   <li className="flex items-start gap-2">
                     <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
