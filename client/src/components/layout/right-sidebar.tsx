@@ -60,8 +60,8 @@ export function RightSidebar() {
             <span>Ad-free browsing experience</span>
           </li>
         </ul>
-        <Button className="w-full bg-white text-accent hover:bg-background font-medium rounded-full py-2">
-          Try Premium
+        <Button className="w-full bg-white text-accent hover:bg-background font-medium rounded-full py-2" asChild>
+          <Link href="/payment">Try Premium</Link>
         </Button>
       </div>
       

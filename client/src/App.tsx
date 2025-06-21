@@ -19,6 +19,7 @@ import PrivacyPage from "@/pages/privacy-page";
 import NotificationsPage from "@/pages/notifications-page";
 import ExplorePage from "@/pages/explore-page";
 import MyPostsPage from "@/pages/my-posts-page";
+import SearchPage from "@/pages/search-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { useSocketEvents } from "@/hooks/use-socket-events";
 
@@ -45,6 +46,7 @@ function Router() {
       <ProtectedRoute path="/my-posts" component={MyPostsPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/explore" component={ExplorePage} />
+      <Route path="/search" component={SearchPage} />
       <Route path="/u/:username" component={UserProfilePage} />
       <ProtectedRoute path="/:communityName/submit" component={CreatePostPage} />
       <Route path="/:communityName/post/:postId" component={PostDetailPage} />

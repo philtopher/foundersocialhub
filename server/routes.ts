@@ -410,13 +410,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 10;
       const userId = req.user?.id ? Number(req.user.id) : undefined;
       
+      // Map 'recent' to 'new' for backend compatibility
+      const backendSort = sort === "recent" ? "new" : sort;
+      
       let posts;
       if (userId && req.query.feed === "subscribed") {
         // Get posts from communities the user is a member of
-        posts = await storage.getSubscribedPosts(userId, sort, page, limit);
+        posts = await storage.getSubscribedPosts(userId, backendSort, page, limit);
       } else {
         // Get all posts
-        posts = await storage.getAllPosts(sort, page, limit);
+        posts = await storage.getAllPosts(backendSort, page, limit);
       }
       
       res.json(posts);
