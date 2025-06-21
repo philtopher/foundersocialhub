@@ -140,6 +140,9 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 
 ```
 Changelog:
+- June 21, 2025. Fixed authentication-based navigation - settings and user-specific links now only visible to logged-in users
+- June 21, 2025. Added desktop navigation links (Home, Explore, Guide) for authenticated users on large screens
+- June 21, 2025. Updated "How It Works" page with simple AI feature examples for different user types (researchers, experts, newbies, founders)
 - June 21, 2025. Implemented comprehensive search functionality across posts, communities, and users with tabbed results page
 - June 21, 2025. Added search button beside search field for improved desktop UX and fixed Recent link sorting
 - June 21, 2025. Fixed mobile hamburger menu with proper Upgrade and Logout links for authenticated users
