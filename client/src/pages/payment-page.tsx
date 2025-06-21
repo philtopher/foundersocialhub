@@ -66,7 +66,7 @@ export default function PaymentPage() {
     {
       id: "standard",
       name: "Standard Plan",
-      price: "$9.99",
+      price: "£3",
       period: "month",
       description: "Perfect for active community builders",
       features: [
@@ -84,7 +84,7 @@ export default function PaymentPage() {
     {
       id: "founder",
       name: "Founder Plan",
-      price: "$99.99",
+      price: "£7",
       period: "month",
       description: "For serious entrepreneurs and business leaders",
       features: [

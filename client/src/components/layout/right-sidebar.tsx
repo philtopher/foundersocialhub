@@ -41,7 +41,7 @@ export function RightSidebar() {
           <Crown className="h-5 w-5 text-yellow-300 mr-2" />
           <h3 className="font-bold text-lg">FounderSocials Premium</h3>
         </div>
-        <p className="text-sm mb-3">Get exclusive features to enhance your founder journey:</p>
+        <p className="text-sm mb-3">Get exclusive features starting from £3/month:</p>
         <ul className="text-sm mb-3 space-y-1">
           <li className="flex items-start">
             <span className="text-yellow-300 mt-1 mr-2">✓</span>
@@ -53,11 +53,11 @@ export function RightSidebar() {
           </li>
           <li className="flex items-start">
             <span className="text-yellow-300 mt-1 mr-2">✓</span>
-            <span>Jira/Trello integration</span>
+            <span>TaskFlowPro integration</span>
           </li>
           <li className="flex items-start">
             <span className="text-yellow-300 mt-1 mr-2">✓</span>
-            <span>Ad-free browsing experience</span>
+            <span>Enhanced profile features</span>
           </li>
         </ul>
         <Button className="w-full bg-white text-accent hover:bg-background font-medium rounded-full py-2" asChild>

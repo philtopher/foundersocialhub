@@ -45,7 +45,8 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 
 ### Payment Processing
 - **Dual Processors**: Stripe and PayPal integration
-- **Subscription Tiers**: Free, Standard ($9.99/month), and Founder ($99.99/month)
+- **Subscription Tiers**: Free, Standard (£3/month), and Founder (£7/month)
+- **Smart Upgrade Logic**: Context-aware upgrade prompts based on current plan
 - **Webhook Handling**: Secure payment status updates
 - **Customer Management**: Automated subscription lifecycle management
 

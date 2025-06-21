@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut, HelpCircle, ExternalLink, Star } from "lucide-react";
+import { Search, Bell, MessageSquare, Plus, Menu, Home, Compass, Bookmark, Users, Settings, LogOut, HelpCircle, ExternalLink, Star, Crown } from "lucide-react";
 import { TaskFlowNavItem } from "@/components/navigation/taskflow-nav-item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -260,11 +260,17 @@ export function Header() {
                       <span>TaskFlowPro</span>
                     </Link>
                   )}
-                  {/* Upgrade to Premium link */}
+                  {/* Smart upgrade link based on current plan */}
                   {(!user.subscriptionPlan || user.subscriptionPlan === "free") && (
                     <Link href="/payment" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-primary">
                       <Star size={18} />
                       <span>Upgrade to Premium</span>
+                    </Link>
+                  )}
+                  {user.subscriptionPlan === "standard" && (
+                    <Link href="/payment" className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-light text-primary">
+                      <Crown size={18} />
+                      <span>Upgrade to Founder Plan</span>
                     </Link>
                   )}
                   
