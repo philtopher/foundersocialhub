@@ -59,10 +59,12 @@ export function LeftSidebar() {
         
         <Link href="/communities" className="text-secondary hover:underline text-sm block mt-4">View All Communities</Link>
         
-        {/* Create Community Button */}
-        <div className="mt-4">
-          <CreateCommunityBox />
-        </div>
+        {/* Create Community Button - only visible to authenticated users */}
+        {user && (
+          <div className="mt-4">
+            <CreateCommunityBox />
+          </div>
+        )}
       </div>
       
       <div className="bg-white rounded-lg border border-border p-4">
