@@ -68,16 +68,7 @@ export function LeftSidebar() {
       <div className="bg-white rounded-lg border border-border p-4">
         <h3 className="font-bold text-lg mb-3">Quick Links</h3>
         <ul className="space-y-2">
-          <li>
-            <Link href="/create-post" className="text-foreground hover:text-primary flex items-center">
-              <Plus className="h-4 w-4 mr-2" /> Create Post
-            </Link>
-          </li>
-          <li>
-            <Link href="/my-posts" className="text-foreground hover:text-primary flex items-center">
-              <FileText className="h-4 w-4 mr-2" /> My Posts
-            </Link>
-          </li>
+          {/* Public links - visible to all users */}
           <li>
             <Link href="/" className="text-foreground hover:text-primary flex items-center">
               <Flame className="h-4 w-4 mr-2" /> Popular Posts
@@ -88,21 +79,37 @@ export function LeftSidebar() {
               <Clock className="h-4 w-4 mr-2" /> Recent
             </Link>
           </li>
-          <li>
-            <Link href="/saved" className="text-foreground hover:text-primary flex items-center">
-              <Bookmark className="h-4 w-4 mr-2" /> Saved
-            </Link>
-          </li>
-          <li>
-            <Link href="/my-communities" className="text-foreground hover:text-primary flex items-center">
-              <Users className="h-4 w-4 mr-2" /> My Communities
-            </Link>
-          </li>
-          <li>
-            <Link href="/settings" className="text-foreground hover:text-primary flex items-center">
-              <Settings className="h-4 w-4 mr-2" /> Settings
-            </Link>
-          </li>
+          
+          {/* User-specific links - only visible to authenticated users */}
+          {user && (
+            <>
+              <li>
+                <Link href="/create-post" className="text-foreground hover:text-primary flex items-center">
+                  <Plus className="h-4 w-4 mr-2" /> Create Post
+                </Link>
+              </li>
+              <li>
+                <Link href="/my-posts" className="text-foreground hover:text-primary flex items-center">
+                  <FileText className="h-4 w-4 mr-2" /> My Posts
+                </Link>
+              </li>
+              <li>
+                <Link href="/saved" className="text-foreground hover:text-primary flex items-center">
+                  <Bookmark className="h-4 w-4 mr-2" /> Saved
+                </Link>
+              </li>
+              <li>
+                <Link href="/my-communities" className="text-foreground hover:text-primary flex items-center">
+                  <Users className="h-4 w-4 mr-2" /> My Communities
+                </Link>
+              </li>
+              <li>
+                <Link href="/settings" className="text-foreground hover:text-primary flex items-center">
+                  <Settings className="h-4 w-4 mr-2" /> Settings
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </aside>
