@@ -1,115 +1,203 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { Header } from "@/components/layout/header";
+import { LeftSidebar } from "@/components/layout/left-sidebar";
+import { RightSidebar } from "@/components/layout/right-sidebar";
+import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Check, Star, Zap, Crown, CreditCard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { PaymentForm } from "@/components/payment/payment-form";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function PaymentPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
-  const [_, navigate] = useLocation();
   const { toast } = useToast();
-  
-  const handlePaymentSuccess = () => {
-    setIsProcessing(true);
-    toast({
-      title: "Payment Successful",
-      description: "Your premium subscription has been activated.",
-    });
-    
-    // Give time for the success message to display
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
+  const [selectedPlan, setSelectedPlan] = useState<"standard" | "founder">("standard");
+
+  const createStripeSubscriptionMutation = useMutation({
+    mutationFn: async (planType: "standard" | "founder") => {
+      const response = await apiRequest("POST", "/api/payments/stripe/create-subscription", {
+        planType,
+        successUrl: window.location.origin + "/payment/success",
+        cancelUrl: window.location.origin + "/payment",
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Payment Error",
+        description: `Failed to create subscription: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createPaypalSubscriptionMutation = useMutation({
+    mutationFn: async (planType: "standard" | "founder") => {
+      const response = await apiRequest("POST", "/api/payments/paypal/create-subscription", {
+        planType,
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.approvalUrl) {
+        window.location.href = data.approvalUrl;
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Payment Error",
+        description: `Failed to create PayPal subscription: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const plans = [
+    {
+      id: "standard",
+      name: "Standard Plan",
+      price: "$9.99",
+      period: "month",
+      description: "Perfect for active community builders",
+      features: [
+        "Unlimited AI-powered comment responses",
+        "Enhanced profile customization",
+        "Priority community support",
+        "Access to premium communities",
+        "Advanced post analytics",
+        "Free TaskFlowPro access",
+      ],
+      icon: <Star className="h-6 w-6" />,
+      color: "bg-blue-600",
+      popular: true,
+    },
+    {
+      id: "founder",
+      name: "Founder Plan",
+      price: "$99.99",
+      period: "month",
+      description: "For serious entrepreneurs and business leaders",
+      features: [
+        "Everything in Standard",
+        "Unlimited AI workflow generation",
+        "Direct comment posting (bypass AI)",
+        "Founder badge and priority visibility",
+        "Advanced community moderation tools",
+        "1-on-1 platform consultation",
+        "Early access to new features",
+        "Premium external integrations",
+      ],
+      icon: <Crown className="h-6 w-6" />,
+      color: "bg-purple-600",
+      popular: false,
+    },
+  ];
+
+  const handleStripeCheckout = (planType: "standard" | "founder") => {
+    createStripeSubscriptionMutation.mutate(planType);
   };
-  
-  const handlePaymentCancel = () => {
-    navigate("/");
+
+  const handlePaypalCheckout = (planType: "standard" | "founder") => {
+    createPaypalSubscriptionMutation.mutate(planType);
   };
-  
-  // Redirect if user is not logged in
-  if (!user && !isProcessing) {
-    navigate("/auth");
-    return null;
-  }
-  
+
   return (
-    <div className="container py-10 max-w-4xl mx-auto">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Choose Your Subscription</h1>
-        <p className="text-muted-foreground mt-2">
-          Select a plan that fits your community engagement needs
-        </p>
-      </div>
-      
-      <div className="grid md:grid-cols-2 gap-10">
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold flex items-center">
-              <span className="bg-indigo-100 p-1 rounded-full mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-indigo-600"><path d="M2 20h.01"></path><path d="M7 20v-4"></path><path d="M12 20v-8"></path><path d="M17 20V8"></path><path d="M22 4v16"></path></svg>
-              </span>
-              Premium Benefits
-            </h2>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600 mr-2 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Create private communities</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600 mr-2 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Enhanced profile customization</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600 mr-2 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Advanced community analytics</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600 mr-2 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>Priority customer support</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-green-600 mr-2 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span>No ads or restrictions</span>
-              </li>
-            </ul>
+    <>
+      <Header />
+      <main className="min-h-screen bg-light-background">
+        <div className="flex">
+          <LeftSidebar />
+          <div className="flex-1 max-w-6xl mx-auto px-4 py-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-4">Upgrade to Premium</h1>
+              <p className="text-neutral-dark text-lg max-w-2xl mx-auto">
+                Unlock advanced features and take your founder journey to the next level
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              {plans.map((plan) => (
+                <Card
+                  key={plan.id}
+                  className={`relative ${
+                    plan.popular ? "border-primary shadow-lg" : "border-light-border"
+                  }`}
+                >
+                  {plan.popular && (
+                    <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary">
+                      Most Popular
+                    </Badge>
+                  )}
+                  <CardHeader className="text-center">
+                    <div className={`${plan.color} text-white rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center`}>
+                      {plan.icon}
+                    </div>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription className="text-lg">
+                      {plan.description}
+                    </CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">{plan.price}</span>
+                      <span className="text-neutral">/{plan.period}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="space-y-3">
+                      <Button
+                        className="w-full"
+                        onClick={() => handleStripeCheckout(plan.id as "standard" | "founder")}
+                        disabled={createStripeSubscriptionMutation.isPending}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Pay with Stripe
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handlePaypalCheckout(plan.id as "standard" | "founder")}
+                        disabled={createPaypalSubscriptionMutation.isPending}
+                      >
+                        Pay with PayPal
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="text-center text-sm text-neutral">
+              <p>All plans include a 7-day free trial. Cancel anytime.</p>
+              <p className="mt-2">
+                Questions? Contact us at{" "}
+                <a href="mailto:support@foundersocials.com" className="text-primary hover:underline">
+                  support@foundersocials.com
+                </a>
+              </p>
+            </div>
           </div>
-          
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold flex items-center">
-              <span className="bg-amber-100 p-1 rounded-full mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
-              </span>
-              Subscription Details
-            </h2>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
-                <span><strong>Standard Plan:</strong> £7/month</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
-                <span><strong>Founder Plan:</strong> £15/month</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M21 14H3"></path></svg>
-                <span>Cancel anytime</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-amber-600 mr-2 mt-0.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                <span>Money-back guarantee</span>
-              </li>
-            </ul>
-          </div>
+          <RightSidebar />
         </div>
-        
-        <div>
-          <PaymentForm
-            onSuccess={handlePaymentSuccess}
-            onCancel={handlePaymentCancel}
-          />
-        </div>
-      </div>
-    </div>
+      </main>
+      <MobileNavigation />
+    </>
   );
 }

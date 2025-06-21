@@ -64,12 +64,12 @@ export function Header() {
           
           {/* Search bar */}
           <div className="hidden md:flex flex-1 mx-4 max-w-xl">
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="relative w-full">
+            <form onSubmit={handleSearch} className="w-full flex">
+              <div className="relative flex-1">
                 <Input
                   type="text"
-                  placeholder="Search communities, posts, or people"
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-light-border bg-light"
+                  placeholder="Search posts, communities, users..."
+                  className="w-full pl-10 pr-4 py-2 rounded-l-full border border-light-border bg-light rounded-r-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -77,6 +77,14 @@ export function Header() {
                   <Search size={16} />
                 </div>
               </div>
+              <Button 
+                type="submit" 
+                variant="outline" 
+                className="rounded-l-none border-l-0 px-3 py-2"
+                disabled={!searchQuery.trim()}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
             </form>
           </div>
           

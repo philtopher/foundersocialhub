@@ -207,6 +207,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(401).json({ message: "Unauthorized" });
   };
 
+  // Search endpoints
+  app.get("/api/search/posts", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.json([]);
+      }
+      const posts = await storage.searchPosts(query);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error searching posts:", error);
+      res.status(500).json({ message: "Failed to search posts" });
+    }
+  });
+
+  app.get("/api/search/communities", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.json([]);
+      }
+      const communities = await storage.searchCommunities(query);
+      res.json(communities);
+    } catch (error) {
+      console.error("Error searching communities:", error);
+      res.status(500).json({ message: "Failed to search communities" });
+    }
+  });
+
+  app.get("/api/search/users", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.json([]);
+      }
+      const users = await storage.searchUsers(query);
+      res.json(users);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ message: "Failed to search users" });
+    }
+  });
+
   // Communities
   app.get("/api/communities", async (req, res) => {
     try {

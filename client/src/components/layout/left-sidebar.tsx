@@ -84,7 +84,7 @@ export function LeftSidebar() {
             </Link>
           </li>
           <li>
-            <Link href="/?sort=new" className="text-foreground hover:text-primary flex items-center">
+            <Link href="/?sort=recent" className="text-foreground hover:text-primary flex items-center">
               <Clock className="h-4 w-4 mr-2" /> Recent
             </Link>
           </li>
