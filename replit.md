@@ -140,6 +140,11 @@ FounderSocials is a comprehensive social platform designed specifically for foun
 
 ```
 Changelog:
+- June 21, 2025. Implemented comprehensive search functionality across posts, communities, and users with tabbed results page
+- June 21, 2025. Added search button beside search field for improved desktop UX and fixed Recent link sorting
+- June 21, 2025. Fixed mobile hamburger menu with proper Upgrade and Logout links for authenticated users
+- June 21, 2025. Updated subscription pricing to £3/month Standard and £7/month Founder with smart upgrade logic
+- June 21, 2025. Implemented context-aware payment page - Standard users see only Founder upgrade, Founder users see no upgrades
 - June 20, 2025. Implemented complete Facebook-style social platform features including modal-based post creation, community creation, notifications page, explore page, and enhanced profile functionality
 - June 20, 2025. Fixed routing conflicts and navigation issues - added dedicated routes for /profile, /notifications, /explore, and /create-post 
 - June 20, 2025. Created Facebook-style post creation modal that works directly from home page without routing conflicts - posts appear instantly in feed
