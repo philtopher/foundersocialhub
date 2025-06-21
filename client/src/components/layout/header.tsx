@@ -109,10 +109,29 @@ export function Header() {
             
             {user ? (
               <>
+                {/* Desktop navigation for authenticated users */}
+                <div className="hidden lg:flex items-center space-x-1 mr-4">
+                  <Link href="/" className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-light transition-colors text-sm">
+                    <Home size={16} />
+                    <span>Home</span>
+                  </Link>
+                  <Link href="/explore" className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-light transition-colors text-sm">
+                    <Compass size={16} />
+                    <span>Explore</span>
+                  </Link>
+                  <Link href="/how-it-works" className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-light transition-colors text-sm">
+                    <HelpCircle size={16} />
+                    <span>Guide</span>
+                  </Link>
+                </div>
+                
+                {/* Action buttons for authenticated users */}
                 <div className="hidden md:flex items-center space-x-2">
-                  <Button variant="ghost" size="icon" className="px-3 py-1.5 rounded-full hover:bg-light-darker">
-                    <Bell size={20} />
-                  </Button>
+                  <Link href="/notifications">
+                    <Button variant="ghost" size="icon" className="px-3 py-1.5 rounded-full hover:bg-light-darker">
+                      <Bell size={20} />
+                    </Button>
+                  </Link>
                   <Button variant="ghost" size="icon" className="px-3 py-1.5 rounded-full hover:bg-light-darker">
                     <MessageSquare size={20} />
                   </Button>
